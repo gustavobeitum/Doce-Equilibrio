@@ -3,18 +3,16 @@ class UsuarioModel {
   final String nome;
   final String email;
   final String tipoDiabetes;
-  final double peso;
-  final double altura;
-  final double imc;
+  final int anoDiagnostico;
+  final String senha;
 
   UsuarioModel({
     this.id,
     required this.nome,
     required this.email,
     required this.tipoDiabetes,
-    required this.peso,
-    required this.altura,
-    required this.imc,
+    required this.anoDiagnostico,
+    required this.senha,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,9 +21,8 @@ class UsuarioModel {
       'nome': nome,
       'email': email,
       'tipoDiabetes': tipoDiabetes,
-      'peso': peso,
-      'altura': altura,
-      'imc': imc,
+      'anoDiagnostico': anoDiagnostico,
+      'senha': senha,
     };
   }
 
@@ -35,9 +32,9 @@ class UsuarioModel {
       nome: map['nome'],
       email: map['email'],
       tipoDiabetes: map['tipoDiabetes'],
-      peso: map['peso'],
-      altura: map['altura'],
-      imc: map['imc'],
+      anoDiagnostico: map['anoDiagnostico'],
+      senha: map['senha'],
     );
   }
 }
+

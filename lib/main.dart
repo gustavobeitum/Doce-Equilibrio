@@ -1,3 +1,4 @@
+import 'package:doce_equilibrio/features/auth/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 
@@ -14,9 +15,10 @@ class DoceEquilibrioApp extends StatelessWidget {
       title: 'Doce Equilíbrio',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      home: const Scaffold(
-        body: Center(child: Text('Setup Inicial Concluído!')),
-      ),
+      // home: const Scaffold(
+      //   body: Center(child: Text('Setup Inicial Concluído!')),
+      // ),
+      home: const LoginScreen(),
     );
   }
 }

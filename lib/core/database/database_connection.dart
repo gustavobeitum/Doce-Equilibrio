@@ -31,9 +31,8 @@ class DatabaseConnection {
         nome TEXT NOT NULL,
         email TEXT NOT NULL,
         tipoDiabetes TEXT NOT NULL,
-        peso REAL NOT NULL,
-        altura REAL NOT NULL,
-        imc REAL NOT NULL
+        anoDiagnostico INTEGER NOT NULL,
+        senha TEXT NOT NULL
       )
     ''');
   }

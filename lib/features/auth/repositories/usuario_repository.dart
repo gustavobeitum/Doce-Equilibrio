@@ -23,4 +23,32 @@ class UsuarioRepository implements IUsuarioRepository {
     }
     return null;
   }
+
+  @override
+  Future<bool> emailJaCadastrado(String email) async {
+    final db = await _dbConnection.database;
+    final maps = await db.query(
+      'Usuario',
+      where: 'email = ?',
+      whereArgs: [email],
+      limit: 1,
+    );
+    return maps.isNotEmpty;
+  }
+
+  @override
+  Future<UsuarioModel?> autenticar(String email, String senha) async {
+    final db = await _dbConnection.database;
+    final maps = await db.query(
+      'Usuario',
+      where: 'email = ? AND senha = ?',
+      whereArgs: [email, senha],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return UsuarioModel.fromMap(maps.first);
+    }
+    return null;
+  }
 }
