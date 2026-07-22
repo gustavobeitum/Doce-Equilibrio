@@ -38,7 +38,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
   void initState() {
     super.initState();
     final repo =
-        widget.repository ?? UsuarioRepository(DatabaseConnection.instance);
+        widget.repository ?? UsuarioRepository(DatabaseConnection());
     _controller = CadastroController(repo);
   }
 
