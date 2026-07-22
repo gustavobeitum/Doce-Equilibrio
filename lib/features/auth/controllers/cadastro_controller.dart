@@ -1,3 +1,4 @@
+import 'package:doce_equilibrio/core/utils/criptografia_util.dart';
 import 'package:flutter/material.dart';
 import 'package:doce_equilibrio/features/auth/models/usuario_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/i_usuario_repository.dart';
@@ -20,12 +21,14 @@ class CadastroController {
         return 'Não foi possível concluir o cadastro. Verifique os dados informados ou tente acessar sua conta.';
       }
 
+      final senhaSegura = CriptografiaUtil.gerarHashSha256(senha);
+
       final usuario = UsuarioModel(
         nome: nome,
         email: email,
         tipoDiabetes: tipoDiabetes,
         anoDiagnostico: anoDiagnostico,
-        senha: senha,
+        senha: senhaSegura,
       );
 
       final id = await _usuarioRepository.criar(usuario);
