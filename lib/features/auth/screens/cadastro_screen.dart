@@ -1,4 +1,5 @@
 import 'package:doce_equilibrio/features/auth/repositories/i_usuario_repository.dart';
+import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
@@ -6,7 +7,6 @@ import 'package:doce_equilibrio/core/widgets/custom_text_field.dart';
 import 'package:doce_equilibrio/core/database/database_connection.dart';
 import 'package:doce_equilibrio/features/auth/repositories/usuario_repository.dart';
 import 'package:doce_equilibrio/features/auth/controllers/cadastro_controller.dart';
-import 'package:doce_equilibrio/features/home/screens/home_screen.dart';
 
 class CadastroScreen extends StatefulWidget {
   final IUsuarioRepository? repository;
@@ -68,7 +68,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
       if (mensagemErro == null && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const MainScreen()),
           (Route<dynamic> route) => false,
         );
       } else if (mounted) {

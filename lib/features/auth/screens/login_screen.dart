@@ -1,5 +1,5 @@
 import 'package:doce_equilibrio/features/auth/repositories/i_usuario_repository.dart';
-import 'package:doce_equilibrio/features/home/screens/home_screen.dart';
+import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (sucesso && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const MainScreen()),
           (Route<dynamic> route) => false,
         );
       } else if (mounted) {
