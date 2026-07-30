@@ -200,7 +200,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                               ),
                             ),
                           ),
-                          value: _tipoDiabetesSelecionado,
+                          initialValue: _tipoDiabetesSelecionado,
                           items: _tiposDiabetes.map((String tipo) {
                             return DropdownMenuItem<String>(
                               value: tipo,
