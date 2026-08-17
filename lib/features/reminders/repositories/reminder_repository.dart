@@ -25,6 +25,17 @@ class ReminderRepository implements ReminderRepositoryInterface {
   }
 
   @override
+  Future<int> completeSingle(int id) async {
+    final db = await _dbConnection.database;
+    return db.update(
+      'Lembrete',
+      {'ativo': 0},
+      where: 'id = ? AND repetir = 0',
+      whereArgs: [id],
+    );
+  }
+
+  @override
   Future<int> delete(int id) async {
     final db = await _dbConnection.database;
     return await db.delete('Lembrete', where: 'id = ?', whereArgs: [id]);

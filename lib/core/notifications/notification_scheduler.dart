@@ -37,7 +37,7 @@ abstract interface class NotificationScheduler {
     required DidReceiveBackgroundNotificationResponseCallback
     onBackgroundResponse,
   });
-  Future<String?> getLaunchPayload();
+  Future<NotificationResponse?> getLaunchResponse();
   Future<void> scheduleWeekly({
     required int id,
     required String title,
@@ -124,10 +124,10 @@ class LocalNotificationScheduler implements NotificationScheduler {
   }
 
   @override
-  Future<String?> getLaunchPayload() async {
+  Future<NotificationResponse?> getLaunchResponse() async {
     final details = await _plugin.getNotificationAppLaunchDetails();
     if (!(details?.didNotificationLaunchApp ?? false)) return null;
-    return details?.notificationResponse?.payload;
+    return details?.notificationResponse;
   }
 
   AndroidScheduleMode get _scheduleMode => _canScheduleExact

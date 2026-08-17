@@ -69,7 +69,10 @@ void setupServiceLocator() {
     () => LocalNotificationScheduler(),
   );
   getIt.registerLazySingleton<NotificationService>(
-    () => NotificationService(getIt<NotificationScheduler>()),
+    () => NotificationService(
+      getIt<NotificationScheduler>(),
+      getIt<ReminderRepositoryInterface>(),
+    ),
   );
   getIt.registerLazySingleton<ReminderNotificationService>(
     () => getIt<NotificationService>(),

@@ -14,12 +14,14 @@ class RingingAlarmScreen extends StatefulWidget {
   final int reminderId;
   final String title;
   final ReminderType type;
+  final int? notificationId;
 
   const RingingAlarmScreen({
     super.key,
     required this.reminderId,
     required this.title,
     required this.type,
+    this.notificationId,
   });
 
   @override
@@ -61,6 +63,10 @@ class _AlarmeTocandoScreenState extends State<RingingAlarmScreen> {
     setState(() => _processando = true);
 
     await _audioService.stop();
+    await getIt<ReminderNotificationService>().dismissReminder(
+      reminderId: widget.reminderId,
+      notificationId: widget.notificationId,
+    );
     if (!mounted) return;
     Navigator.of(context).pop();
   }
@@ -77,6 +83,7 @@ class _AlarmeTocandoScreenState extends State<RingingAlarmScreen> {
       title: widget.title,
       type: widget.type,
       minutes: minutos,
+      notificationId: widget.notificationId,
     );
 
     if (!mounted) return;
