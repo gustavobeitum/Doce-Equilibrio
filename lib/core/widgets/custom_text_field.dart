@@ -37,10 +37,7 @@ class CustomTextField extends StatelessWidget {
         hintText: hintText,
         suffixIcon: suffixIcon,
         errorMaxLines: 3,
-        errorStyle: const TextStyle(
-          color: AppColors.dangerColor,
-          height: 1.2,
-        ),
+        errorStyle: const TextStyle(color: AppColors.dangerColor, height: 1.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -51,24 +48,15 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primaryColor,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.dangerColor,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.dangerColor, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.dangerColor,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.dangerColor, width: 2),
         ),
       ),
     );
