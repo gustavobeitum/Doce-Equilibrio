@@ -64,6 +64,12 @@ class _FakeNotificationService implements ReminderNotificationService {
   }
 
   @override
+  Future<void> dismissReminder({
+    required int reminderId,
+    int? notificationId,
+  }) async {}
+
+  @override
   Future<void> scheduleReminder(ReminderModel reminder) async {
     scheduled = reminder;
   }
@@ -74,6 +80,7 @@ class _FakeNotificationService implements ReminderNotificationService {
     required String title,
     required ReminderType type,
     required int minutes,
+    int? notificationId,
   }) async {}
 }
 
@@ -82,6 +89,9 @@ class _FakeReminderRepository implements ReminderRepositoryInterface {
 
   @override
   Future<int> create(ReminderModel reminder) async => 1;
+
+  @override
+  Future<int> completeSingle(int id) async => 1;
 
   @override
   Future<int> delete(int id) async => 1;
