@@ -4,7 +4,7 @@ import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/custom_text_field.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
-import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
+import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserModel currentUser;
@@ -69,8 +69,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         glycemiaTarget: widget.currentUser.glycemiaTarget,
       );
 
-      final repo = getIt<UserRepositoryInterface>();
-      await repo.update(updatedUser);
+      await getIt<ProfileController>().updateProfile(updatedUser);
 
       setState(() => _isLoading = false);
 

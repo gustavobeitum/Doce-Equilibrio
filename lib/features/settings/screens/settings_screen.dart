@@ -15,8 +15,7 @@ import 'package:doce_equilibrio/features/settings/widgets/customize_glycemia_tar
 import 'package:doce_equilibrio/features/settings/widgets/edit_insulin_parameters_modal.dart';
 import 'package:doce_equilibrio/features/reminders/screens/reminders_screen.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
-import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,30 +25,24 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _ConfigScreenState extends State<SettingsScreen> {
+  late final ProfileController _controller;
   UserModel? _user;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _controller = getIt<ProfileController>();
     _carregarDadosUsuario();
   }
 
   Future<void> _carregarDadosUsuario() async {
-    final storage = const FlutterSecureStorage();
-    final idString = await storage.read(key: 'usuario_id');
-
-    if (idString != null) {
-      final id = int.parse(idString);
-      final repository = getIt<UserRepositoryInterface>();
-
-      final foundUser = await repository.find(id);
-
-      setState(() {
-        _user = foundUser;
-        _isLoading = false;
-      });
-    }
+    final foundUser = await _controller.loadCurrentUser();
+    if (!mounted) return;
+    setState(() {
+      _user = foundUser;
+      _isLoading = false;
+    });
   }
 
   Future<void> _abrirTelaEdicao() async {
@@ -193,32 +186,11 @@ class _ConfigScreenState extends State<SettingsScreen> {
                                     heightController.text,
                                   );
 
-                                  final updatedUser = UserModel(
-                                    id: _user!.id,
-                                    name: _user!.name,
-                                    email: _user!.email,
-                                    diabetesType: _user!.diabetesType,
-                                    diagnosisYear: _user!.diagnosisYear,
-                                    password: _user!.password,
-                                    salt: _user!.salt,
+                                  await _controller.updateVitalData(
+                                    currentUser: _user!,
                                     weight: formattedWeight,
                                     height: formattedHeight,
-                                    lowDangerThreshold:
-                                        _user!.lowDangerThreshold,
-                                    normalMinimumThreshold:
-                                        _user!.normalMinimumThreshold,
-                                    normalMaximumThreshold:
-                                        _user!.normalMaximumThreshold,
-                                    highDangerThreshold:
-                                        _user!.highDangerThreshold,
-                                    sensitivityFactor: _user!.sensitivityFactor,
-                                    correctionFactor: _user!.correctionFactor,
-                                    glycemiaTarget: _user!.glycemiaTarget,
                                   );
-
-                                  final repo = getIt<UserRepositoryInterface>();
-
-                                  await repo.update(updatedUser);
 
                                   if (context.mounted) {
                                     Navigator.pop(context, true);
@@ -370,8 +342,7 @@ class _ConfigScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _realizarLogout() async {
-    const storage = FlutterSecureStorage();
-    await storage.delete(key: 'usuario_id');
+    await _controller.logout();
 
     if (!mounted) return;
 
