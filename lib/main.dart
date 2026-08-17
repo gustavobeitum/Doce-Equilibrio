@@ -29,7 +29,7 @@ class _SweetBalanceAppState extends State<SweetBalanceApp> {
     // (inclusive a frio, totalmente fechado) por causa de um alarme.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (getIt.isRegistered<NotificationService>()) {
-        getIt<NotificationService>().tratarLancamentoPorNotificacao();
+        getIt<NotificationService>().handleNotificationLaunch();
       }
     });
   }

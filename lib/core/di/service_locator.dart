@@ -7,6 +7,7 @@ import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controlle
 import 'package:doce_equilibrio/features/glycemia/repositories/glycemia_repository.dart';
 import 'package:doce_equilibrio/features/glycemia/repositories/glycemia_repository_interface.dart';
 import 'package:doce_equilibrio/core/services/notification_service.dart';
+import 'package:doce_equilibrio/core/notifications/notification_scheduler.dart';
 import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/activity/controllers/activity_controller.dart';
 import 'package:doce_equilibrio/features/activity/repositories/activity_repository.dart';
@@ -24,6 +25,7 @@ import 'package:doce_equilibrio/features/medication/repositories/medication_repo
 import 'package:doce_equilibrio/features/reminders/controllers/reminder_controller.dart';
 import 'package:doce_equilibrio/features/reminders/repositories/reminder_repository_interface.dart';
 import 'package:doce_equilibrio/features/reminders/repositories/reminder_repository.dart';
+import 'package:doce_equilibrio/features/reminders/services/reminder_notification_service.dart';
 import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 import 'package:get_it/get_it.dart';
 
@@ -63,7 +65,15 @@ void setupServiceLocator() {
     () => ActivityRepository(getIt<DatabaseConnection>()),
   );
 
-  getIt.registerLazySingleton<NotificationService>(() => NotificationService());
+  getIt.registerLazySingleton<NotificationScheduler>(
+    () => LocalNotificationScheduler(),
+  );
+  getIt.registerLazySingleton<NotificationService>(
+    () => NotificationService(getIt<NotificationScheduler>()),
+  );
+  getIt.registerLazySingleton<ReminderNotificationService>(
+    () => getIt<NotificationService>(),
+  );
 
   getIt.registerFactory<LoginController>(
     () => LoginController(
@@ -98,7 +108,7 @@ void setupServiceLocator() {
   getIt.registerFactory<ReminderController>(
     () => ReminderController(
       getIt<ReminderRepositoryInterface>(),
-      getIt<NotificationService>(),
+      getIt<ReminderNotificationService>(),
       getIt<SessionService>(),
     ),
   );

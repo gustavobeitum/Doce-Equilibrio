@@ -1,9 +1,9 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/services/alarm_audio_service.dart';
 import 'package:doce_equilibrio/core/services/alarm_window_service.dart';
-import 'package:doce_equilibrio/core/services/notification_service.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_type.dart';
+import 'package:doce_equilibrio/features/reminders/services/reminder_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
@@ -71,12 +71,12 @@ class _AlarmeTocandoScreenState extends State<RingingAlarmScreen> {
 
     await _audioService.stop();
 
-    final notificationService = getIt<NotificationService>();
-    await notificationService.adiarLembrete(
+    final notificationService = getIt<ReminderNotificationService>();
+    await notificationService.snoozeReminder(
       reminderId: widget.reminderId,
       title: widget.title,
       type: widget.type,
-      minutos: minutos,
+      minutes: minutos,
     );
 
     if (!mounted) return;

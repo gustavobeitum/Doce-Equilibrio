@@ -1,13 +1,13 @@
-import 'package:doce_equilibrio/core/services/notification_service.dart';
 import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_model.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_type.dart';
 import 'package:doce_equilibrio/features/reminders/repositories/reminder_repository_interface.dart';
+import 'package:doce_equilibrio/features/reminders/services/reminder_notification_service.dart';
 import 'package:flutter/foundation.dart';
 
 class ReminderController {
   final ReminderRepositoryInterface repository;
-  final NotificationService _notificationService;
+  final ReminderNotificationService _notificationService;
   final SessionService _sessionService;
 
   ReminderController(
