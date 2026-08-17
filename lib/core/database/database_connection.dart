@@ -11,6 +11,8 @@ class DatabaseConnection {
 
   static Database? _database;
 
+  static const int _databaseVersion = 8;
+
   final _secureStorage = const FlutterSecureStorage();
 
   Future<Database> get database async {
@@ -42,12 +44,16 @@ class DatabaseConnection {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: _databaseVersion,
       password: encryptionKey,
+      onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
+  // Ponto unico de verdade para instalacoes novas. Bancos existentes sao
+  // atualizados de forma aditiva por [_onUpgrade], sem apagar dados.
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE Usuario (
@@ -56,8 +62,239 @@ class DatabaseConnection {
         email TEXT NOT NULL UNIQUE,
         tipoDiabetes TEXT NOT NULL,
         anoDiagnostico INTEGER NOT NULL,
-        senha TEXT NOT NULL
+        senha TEXT NOT NULL,
+        salt TEXT NOT NULL,
+        peso REAL,
+        altura INTEGER,
+        limitePerigoBaixo INTEGER NOT NULL DEFAULT 50,
+        limiteNormalMinimo INTEGER NOT NULL DEFAULT 70,
+        limiteNormalMaximo INTEGER NOT NULL DEFAULT 140,
+        limitePerigoAlto INTEGER NOT NULL DEFAULT 180,
+        fatorSensibilidade REAL NOT NULL DEFAULT 15,
+        fatorCorrecao REAL NOT NULL DEFAULT 20,
+        metaGlicemica INTEGER NOT NULL DEFAULT 100
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE Glicemia (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        valor INTEGER NOT NULL,
+        periodo TEXT NOT NULL,
+        dataHora TEXT NOT NULL,
+        observacao TEXT,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_glicemia_user_data ON Glicemia (usuarioId, dataHora)',
+    );
+
+    await db.execute('''
+      CREATE TABLE Lembrete (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        tipo TEXT NOT NULL,
+        titulo TEXT NOT NULL,
+        hora INTEGER NOT NULL,
+        minuto INTEGER NOT NULL,
+        repetir INTEGER NOT NULL DEFAULT 1,
+        diasSemana TEXT NOT NULL,
+        data TEXT,
+        ativo INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_lembrete_user ON Lembrete (usuarioId)');
+
+    await db.execute('''
+      CREATE TABLE Alimento (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        nome TEXT NOT NULL,
+        carboidratosPor100g REAL NOT NULL,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_alimento_user ON Alimento (usuarioId)');
+
+    await db.execute('''
+      CREATE TABLE Refeicao (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        tipo TEXT NOT NULL,
+        dataHora TEXT NOT NULL,
+        favorita INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_refeicao_user_data ON Refeicao (usuarioId, dataHora)',
+    );
+
+    await db.execute('''
+      CREATE TABLE RefeicaoItem (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        refeicaoId INTEGER NOT NULL,
+        alimentoId INTEGER NOT NULL,
+        nomeAlimento TEXT NOT NULL,
+        carboidratosPor100g REAL NOT NULL,
+        quantidadeGramas REAL NOT NULL,
+        FOREIGN KEY (refeicaoId) REFERENCES Refeicao (id) ON DELETE CASCADE,
+        FOREIGN KEY (alimentoId) REFERENCES Alimento (id)
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_refeicaoitem_refeicao ON RefeicaoItem (refeicaoId)',
+    );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    await db.transaction((txn) async {
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'salt',
+        "TEXT NOT NULL DEFAULT ''",
+      );
+      await _addColumnIfMissing(txn, 'Usuario', 'peso', 'REAL');
+      await _addColumnIfMissing(txn, 'Usuario', 'altura', 'INTEGER');
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'limitePerigoBaixo',
+        'INTEGER NOT NULL DEFAULT 50',
+      );
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'limiteNormalMinimo',
+        'INTEGER NOT NULL DEFAULT 70',
+      );
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'limiteNormalMaximo',
+        'INTEGER NOT NULL DEFAULT 140',
+      );
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'limitePerigoAlto',
+        'INTEGER NOT NULL DEFAULT 180',
+      );
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'fatorSensibilidade',
+        'REAL NOT NULL DEFAULT 15',
+      );
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'fatorCorrecao',
+        'REAL NOT NULL DEFAULT 20',
+      );
+      await _addColumnIfMissing(
+        txn,
+        'Usuario',
+        'metaGlicemica',
+        'INTEGER NOT NULL DEFAULT 100',
+      );
+
+      await _createFeatureTables(txn);
+    });
+  }
+
+  Future<void> _createFeatureTables(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS Glicemia (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        valor INTEGER NOT NULL,
+        periodo TEXT NOT NULL,
+        dataHora TEXT NOT NULL,
+        observacao TEXT,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_glicemia_user_data '
+      'ON Glicemia (usuarioId, dataHora)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS Lembrete (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        tipo TEXT NOT NULL,
+        titulo TEXT NOT NULL,
+        hora INTEGER NOT NULL,
+        minuto INTEGER NOT NULL,
+        repetir INTEGER NOT NULL DEFAULT 1,
+        diasSemana TEXT NOT NULL,
+        data TEXT,
+        ativo INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_lembrete_user ON Lembrete (usuarioId)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS Alimento (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        nome TEXT NOT NULL,
+        carboidratosPor100g REAL NOT NULL,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_alimento_user ON Alimento (usuarioId)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS Refeicao (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        tipo TEXT NOT NULL,
+        dataHora TEXT NOT NULL,
+        favorita INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_refeicao_user_data '
+      'ON Refeicao (usuarioId, dataHora)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS RefeicaoItem (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        refeicaoId INTEGER NOT NULL,
+        alimentoId INTEGER NOT NULL,
+        nomeAlimento TEXT NOT NULL,
+        carboidratosPor100g REAL NOT NULL,
+        quantidadeGramas REAL NOT NULL,
+        FOREIGN KEY (refeicaoId) REFERENCES Refeicao (id) ON DELETE CASCADE,
+        FOREIGN KEY (alimentoId) REFERENCES Alimento (id)
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_refeicaoitem_refeicao '
+      'ON RefeicaoItem (refeicaoId)',
+    );
+  }
+
+  Future<void> _addColumnIfMissing(
+    DatabaseExecutor db,
+    String table,
+    String column,
+    String definition,
+  ) async {
+    final columns = await db.rawQuery('PRAGMA table_info($table)');
+    final exists = columns.any((row) => row['name'] == column);
+    if (!exists) {
+      await db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
+    }
   }
 }
