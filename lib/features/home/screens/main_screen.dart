@@ -1,6 +1,10 @@
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/features/activity/screens/activity_screen.dart';
+import 'package:doce_equilibrio/features/food/screens/foods_screen.dart';
+import 'package:doce_equilibrio/features/insulin/screens/insulin_calculator_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:doce_equilibrio/features/home/screens/home_screen.dart'; 
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import 'package:doce_equilibrio/features/home/screens/home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,28 +16,29 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _telas = [
-    const HomeScreen(), 
-    const Center(child: Text('Tela Insulina em construção', style: TextStyle(color: Colors.black))),
-    const Center(child: Text('Tela Alimentos em construção', style: TextStyle(color: Colors.black))),
-    const Center(child: Text('Tela Atividade em construção', style: TextStyle(color: Colors.black))),
-  ];
+  void _irParaAbaInsulina() {
+    setState(() => _currentIndex = 1);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final telas = [
+      HomeScreen(onNavegarParaInsulina: _irParaAbaInsulina),
+      const InsulinCalculatorScreen(),
+      const FoodsScreen(),
+      const ActivityScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.primaryColor,
-      
+
       body: SafeArea(
         child: Container(
           color: Colors.white,
-          child: IndexedStack(
-            index: _currentIndex,
-            children: _telas,
-          ),
+          child: IndexedStack(index: _currentIndex, children: telas),
         ),
       ),
-      
+
       bottomNavigationBar: SafeArea(
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -42,33 +47,39 @@ class _MainScreenState extends State<MainScreen> {
               _currentIndex = index;
             });
           },
-          type: BottomNavigationBarType.fixed, 
+          type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
-          selectedItemColor: AppColors.primaryColor, 
+          selectedItemColor: AppColors.primaryColor,
           unselectedItemColor: Colors.grey,
           showUnselectedLabels: true,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
-          elevation: 10, 
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.normal,
+            fontSize: 12,
+          ),
+          elevation: 10,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
+              icon: Icon(PhosphorIcons.house),
+              activeIcon: Icon(PhosphorIcons.houseFill),
               label: 'Início',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.water_drop_outlined),
-              activeIcon: Icon(Icons.water_drop),
+              icon: Icon(PhosphorIcons.drop),
+              activeIcon: Icon(PhosphorIcons.dropFill),
               label: 'Insulina',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.restaurant_outlined),
-              activeIcon: Icon(Icons.restaurant),
+              icon: Icon(PhosphorIcons.forkKnife),
+              activeIcon: Icon(PhosphorIcons.forkKnifeFill),
               label: 'Alimentos',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.monitor_heart_outlined), 
-              activeIcon: Icon(Icons.monitor_heart),
+              icon: Icon(PhosphorIcons.heartbeat),
+              activeIcon: Icon(PhosphorIcons.heartbeatFill),
               label: 'Atividade',
             ),
           ],
