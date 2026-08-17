@@ -3,7 +3,7 @@ import 'package:doce_equilibrio/main.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const DoceEquilibrioApp());
+    await tester.pumpWidget(const SweetBalanceApp());
 
     expect(find.text('Doce Equilíbrio'), findsWidgets);
   });
