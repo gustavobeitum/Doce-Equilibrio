@@ -1,21 +1,51 @@
-import 'package:doce_equilibrio/core/utils/criptografia_util.dart';
-import 'package:doce_equilibrio/features/auth/repositories/i_usuario_repository.dart';
+import 'package:doce_equilibrio/core/errors/auth_exceptions.dart';
+import 'package:doce_equilibrio/core/utils/encryption_utils.dart';
+import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginController {
-  final IUsuarioRepository _usuarioRepository;
+  final UserRepositoryInterface _userRepository;
+  final _storage = const FlutterSecureStorage();
 
-  LoginController(this._usuarioRepository);
+  LoginController(this._userRepository);
 
-  Future<bool> entrar({
+  /// Realiza o login validando o hash da senha na camada de aplicação
+  /// (nunca via comparação direta na query SQL).
+  ///
+  /// Retorna `null` em caso de sucesso, ou uma mensagem de erro que já
+  /// diferencia credenciais inválidas de falhas de conexão/banco de dados.
+  Future<String?> login({
     required String email,
-    required String senha,
+    required String password,
   }) async {
     try {
-      final senhaSegura = CriptografiaUtil.gerarHashSha256(senha);
-      final usuario = await _usuarioRepository.autenticar(email, senhaSegura);
-      return usuario != null;
+      final user = await _userRepository.findByEmail(email.trim());
+
+      if (user == null || user.salt.isEmpty) {
+        throw const InvalidCredentialsException();
+      }
+
+      final senhaValida = EncryptionUtils.validatePassword(
+        enteredPassword: password,
+        storedHash: user.password,
+        salt: user.salt,
+      );
+
+      if (!senhaValida) {
+        throw const InvalidCredentialsException();
+      }
+
+      await _storage.write(key: 'usuario_id', value: user.id.toString());
+      return null;
+    } on InvalidCredentialsException catch (e) {
+      return e.message;
     } catch (e) {
-      return false;
+      // Qualquer outra falha (banco indisponível, erro de I/O, chave de
+      // criptografia inacessível etc.) é tratada como falha de
+      // infraestrutura, nunca é mascarada como "credenciais inválidas".
+      debugPrint('ERRO AO REALIZAR LOGIN: $e');
+      return const DatabaseConnectionException().message;
     }
   }
 }

@@ -1,16 +1,16 @@
-import 'package:doce_equilibrio/features/auth/repositories/i_usuario_repository.dart';
+import 'package:doce_equilibrio/core/di/service_locator.dart';
+import 'package:doce_equilibrio/core/utils/validators.dart';
+import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/custom_text_field.dart';
-import 'package:doce_equilibrio/core/database/database_connection.dart';
-import 'package:doce_equilibrio/features/auth/repositories/usuario_repository.dart';
 import 'package:doce_equilibrio/features/auth/controllers/login_controller.dart';
-import 'cadastro_screen.dart';
+import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  final IUsuarioRepository? repository;
+  final UserRepositoryInterface? repository;
 
   const LoginScreen({super.key, this.repository});
 
@@ -21,7 +21,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _senhaController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   bool _obscureText = true;
   bool _isLoading = false;
@@ -30,58 +30,60 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    final repo =
-        widget.repository ?? UsuarioRepository(DatabaseConnection());
+    final repo = widget.repository ?? getIt<UserRepositoryInterface>();
     _controller = LoginController(repo);
   }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _senhaController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _realizarLogin() async {
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(PhosphorIcons.warningCircleFill, color: AppColors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.dangerColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        margin: const EdgeInsets.all(24),
+      ),
+    );
+  }
+
+  Future<void> _performLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      final sucesso = await _controller.entrar(
+      final errorMessage = await _controller.login(
         email: _emailController.text,
-        senha: _senhaController.text,
+        password: _passwordController.text,
       );
 
       setState(() => _isLoading = false);
 
-      if (sucesso && mounted) {
+      if (errorMessage == null && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const MainScreen()),
           (Route<dynamic> route) => false,
         );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(PhosphorIcons.warningCircleFill, color: AppColors.white),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'E-mail ou senha incorretos.',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: AppColors.dangerColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            margin: const EdgeInsets.all(24),
-          ),
-        );
+      } else if (errorMessage != null) {
+        _showError(errorMessage);
       }
     }
   }
@@ -98,12 +100,13 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    PhosphorIcons.dropFill,
-                    size: 80,
-                    color: AppColors.white,
-                  ),
-                  const SizedBox(height: 16),
+                  // Icon(
+                  //   PhosphorIcons.dropFill,
+                  //   size: 80,
+                  //   color: AppColors.white,
+                  // ),
+                  Image.asset('assets/logo.png', height: 100),
+                  const SizedBox(height: 2),
                   const Text(
                     'Doce Equilíbrio',
                     style: TextStyle(
@@ -150,19 +153,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           labelText: 'Email',
                           hintText: 'seu@email.com',
                           keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'O email é obrigatório.';
-                            }
-                            if (!value.contains('@') || !value.contains('.')) {
-                              return 'Por favor, insira um endereço de email válido.';
-                            }
-                            return null;
-                          },
+                          validator: Validators.validateEmail,
                         ),
                         const SizedBox(height: 16),
                         CustomTextField(
-                          controller: _senhaController,
+                          controller: _passwordController,
                           labelText: 'Senha',
                           obscureText: _obscureText,
                           validator: (value) {
@@ -198,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: _isLoading ? null : _realizarLogin,
+                          onPressed: _isLoading ? null : _performLogin,
                           child: _isLoading
                               ? const SizedBox(
                                   height: 20,
@@ -221,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        const CadastroScreen(),
+                                        const RegistrationScreen(),
                                   ),
                                 );
                               },

@@ -1,71 +1,80 @@
-import 'package:doce_equilibrio/features/auth/repositories/i_usuario_repository.dart';
+import 'package:doce_equilibrio/core/di/service_locator.dart';
+import 'package:doce_equilibrio/core/utils/validators.dart';
+import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/custom_text_field.dart';
-import 'package:doce_equilibrio/core/database/database_connection.dart';
-import 'package:doce_equilibrio/features/auth/repositories/usuario_repository.dart';
-import 'package:doce_equilibrio/features/auth/controllers/cadastro_controller.dart';
+import 'package:doce_equilibrio/features/auth/controllers/registration_controller.dart';
 
-class CadastroScreen extends StatefulWidget {
-  final IUsuarioRepository? repository;
+class RegistrationScreen extends StatefulWidget {
+  final UserRepositoryInterface? repository;
 
-  const CadastroScreen({super.key, this.repository});
+  const RegistrationScreen({super.key, this.repository});
 
   @override
-  State<CadastroScreen> createState() => _CadastroScreenState();
+  State<RegistrationScreen> createState() => _CadastroScreenState();
 }
 
-class _CadastroScreenState extends State<CadastroScreen> {
+class _CadastroScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _nomeController = TextEditingController();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _anoController = TextEditingController();
-  final _senhaController = TextEditingController();
-  final _confirmarSenhaController = TextEditingController();
+  final _yearController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _passwordConfirmationController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _heightController = TextEditingController();
 
   bool _obscureSenha = true;
   bool _obscureConfirmarSenha = true;
-  String? _tipoDiabetesSelecionado;
+  String? _selectedDiabetesType;
   bool _isLoading = false;
 
   final List<String> _tiposDiabetes = ['Tipo 1', 'Tipo 2', 'Gestacional'];
-  late final CadastroController _controller;
+  late final RegistrationController _controller;
 
   @override
   void initState() {
     super.initState();
-    final repo = widget.repository ?? UsuarioRepository(DatabaseConnection());
-    _controller = CadastroController(repo);
+    final repo = widget.repository ?? getIt<UserRepositoryInterface>();
+    _controller = RegistrationController(repo);
   }
 
   @override
   void dispose() {
-    _nomeController.dispose();
+    _nameController.dispose();
     _emailController.dispose();
-    _anoController.dispose();
-    _senhaController.dispose();
-    _confirmarSenhaController.dispose();
+    _yearController.dispose();
+    _passwordController.dispose();
+    _passwordConfirmationController.dispose();
+    _weightController.dispose();
+    _heightController.dispose();
     super.dispose();
   }
 
-  Future<void> _realizarCadastro() async {
+  Future<void> _performRegistration() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      final mensagemErro = await _controller.registrar(
-        nome: _nomeController.text,
+      final weight = double.parse(_weightController.text.replaceAll(',', '.'));
+      final height = int.parse(_heightController.text);
+
+      final errorMessage = await _controller.register(
+        name: _nameController.text,
         email: _emailController.text,
-        tipoDiabetes: _tipoDiabetesSelecionado!,
-        anoDiagnostico: int.parse(_anoController.text),
-        senha: _senhaController.text,
+        diabetesType: _selectedDiabetesType!,
+        diagnosisYear: int.parse(_yearController.text),
+        password: _passwordController.text,
+        weight: weight,
+        height: height,
       );
 
       setState(() => _isLoading = false);
 
-      if (mensagemErro == null && mounted) {
+      if (errorMessage == null && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -80,7 +89,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    mensagemErro ?? 'Erro desconhecido.',
+                    errorMessage ?? 'Erro desconhecido.',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -149,7 +158,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                         ),
                         const SizedBox(height: 24),
                         CustomTextField(
-                          controller: _nomeController,
+                          controller: _nameController,
                           labelText: 'Nome Completo',
                           hintText: 'Seu nome completo',
                           validator: (value) {
@@ -165,15 +174,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                           labelText: 'Email',
                           hintText: 'seu@email.com',
                           keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'O email é obrigatório.';
-                            }
-                            if (!value.contains('@') || !value.contains('.')) {
-                              return 'Por favor, insira um endereço de email válido.';
-                            }
-                            return null;
-                          },
+                          validator: Validators.validateEmail,
                         ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
@@ -200,16 +201,16 @@ class _CadastroScreenState extends State<CadastroScreen> {
                               ),
                             ),
                           ),
-                          initialValue: _tipoDiabetesSelecionado,
-                          items: _tiposDiabetes.map((String tipo) {
+                          initialValue: _selectedDiabetesType,
+                          items: _tiposDiabetes.map((String type) {
                             return DropdownMenuItem<String>(
-                              value: tipo,
-                              child: Text(tipo),
+                              value: type,
+                              child: Text(type),
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
                             setState(() {
-                              _tipoDiabetesSelecionado = newValue;
+                              _selectedDiabetesType = newValue;
                             });
                           },
                           validator: (value) {
@@ -222,7 +223,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                         ),
                         const SizedBox(height: 16),
                         CustomTextField(
-                          controller: _anoController,
+                          controller: _yearController,
                           labelText: 'Ano do Diagnóstico',
                           hintText: 'Ex: 2020',
                           keyboardType: TextInputType.number,
@@ -230,22 +231,70 @@ class _CadastroScreenState extends State<CadastroScreen> {
                             if (value == null || value.trim().isEmpty) {
                               return 'O ano do diagnóstico é obrigatório.';
                             }
-                            final ano = int.tryParse(value);
-                            if (ano == null) {
+                            final year = int.tryParse(value);
+                            if (year == null) {
                               return 'Por favor, insira apenas números.';
                             }
-                            if (ano < 1900) {
+                            if (year < 1900) {
                               return 'O ano inserido é muito antigo.';
                             }
-                            if (ano > DateTime.now().year) {
+                            if (year > DateTime.now().year) {
                               return 'O ano não pode estar no futuro.';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 16),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: CustomTextField(
+                                controller: _weightController,
+                                labelText: 'Peso (kg)',
+                                hintText: 'Ex: 70.5',
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'O peso é obrigatório.';
+                                  }
+                                  final weight = double.tryParse(
+                                    value.replaceAll(',', '.'),
+                                  );
+                                  if (weight == null || weight <= 0) {
+                                    return 'Peso inválido.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: CustomTextField(
+                                controller: _heightController,
+                                labelText: 'Altura (cm)',
+                                hintText: 'Ex: 175',
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'A altura é obrigatória.';
+                                  }
+                                  final height = int.tryParse(value);
+                                  if (height == null || height <= 0) {
+                                    return 'Altura inválida.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
                         CustomTextField(
-                          controller: _senhaController,
+                          controller: _passwordController,
                           labelText: 'Senha',
                           obscureText: _obscureSenha,
                           validator: (value) {
@@ -285,14 +334,14 @@ class _CadastroScreenState extends State<CadastroScreen> {
                         ),
                         const SizedBox(height: 16),
                         CustomTextField(
-                          controller: _confirmarSenhaController,
+                          controller: _passwordConfirmationController,
                           labelText: 'Confirmar Senha',
                           obscureText: _obscureConfirmarSenha,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'A confirmação de senha é obrigatória.';
                             }
-                            if (value != _senhaController.text) {
+                            if (value != _passwordController.text) {
                               return 'As senhas informadas não coincidem. Verifique novamente.';
                             }
                             return null;
@@ -314,7 +363,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                         ),
                         const SizedBox(height: 32),
                         ElevatedButton(
-                          onPressed: _isLoading ? null : _realizarCadastro,
+                          onPressed: _isLoading ? null : _performRegistration,
                           child: _isLoading
                               ? const SizedBox(
                                   height: 20,
