@@ -1,14 +1,14 @@
 import 'package:doce_equilibrio/core/errors/auth_exceptions.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/core/utils/encryption_utils.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginController {
   final UserRepositoryInterface _userRepository;
-  final _storage = const FlutterSecureStorage();
+  final SessionService _sessionService;
 
-  LoginController(this._userRepository);
+  LoginController(this._userRepository, this._sessionService);
 
   /// Realiza o login validando o hash da senha na camada de aplicação
   /// (nunca via comparação direta na query SQL).
@@ -36,7 +36,7 @@ class LoginController {
         throw const InvalidCredentialsException();
       }
 
-      await _storage.write(key: 'usuario_id', value: user.id.toString());
+      await _sessionService.startSession(user.id!);
       return null;
     } on InvalidCredentialsException catch (e) {
       return e.message;

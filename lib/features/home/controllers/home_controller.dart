@@ -1,13 +1,12 @@
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class HomeController {
   final UserRepositoryInterface repository;
-  final FlutterSecureStorage _storage;
+  final SessionService _sessionService;
 
-  HomeController(this.repository, {FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
+  HomeController(this.repository, this._sessionService);
 
   String getGreeting() {
     final horaAtual = DateTime.now().hour;
@@ -38,10 +37,7 @@ class HomeController {
   /// Retorna `null` se não houver sessão ativa ou o usuário não for
   /// encontrado no banco.
   Future<UserModel?> findLoggedInUser() async {
-    final idString = await _storage.read(key: 'usuario_id');
-    if (idString == null) return null;
-
-    final id = int.tryParse(idString);
+    final id = await _sessionService.getCurrentUserId();
     if (id == null) return null;
 
     return repository.find(id);

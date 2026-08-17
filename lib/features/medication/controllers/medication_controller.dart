@@ -1,23 +1,16 @@
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/medication/models/medication_model.dart';
 import 'package:doce_equilibrio/features/medication/repositories/medication_repository_interface.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MedicationController {
   final MedicationRepositoryInterface repository;
-  final FlutterSecureStorage _storage;
+  final SessionService _sessionService;
 
-  MedicationController(this.repository, {FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
-
-  Future<int?> _usuarioIdLogado() async {
-    final idString = await _storage.read(key: 'usuario_id');
-    if (idString == null) return null;
-    return int.tryParse(idString);
-  }
+  MedicationController(this.repository, this._sessionService);
 
   Future<List<MedicationModel>> listar() async {
-    final usuarioId = await _usuarioIdLogado();
+    final usuarioId = await _sessionService.getCurrentUserId();
     if (usuarioId == null) return [];
     return repository.listByUser(usuarioId);
   }
@@ -37,7 +30,7 @@ class MedicationController {
     }
 
     try {
-      final usuarioId = await _usuarioIdLogado();
+      final usuarioId = await _sessionService.getCurrentUserId();
       if (usuarioId == null) {
         return 'Sessão expirada. Faça login novamente.';
       }

@@ -1,4 +1,5 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
@@ -8,7 +9,6 @@ import 'package:doce_equilibrio/features/glycemia/models/glycemia_record_model.d
 import 'package:doce_equilibrio/features/glycemia/widgets/glycemia_record_card.dart';
 import 'package:doce_equilibrio/features/glycemia/widgets/glycemia_record_modal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 class GlycemiaHistoryScreen extends StatefulWidget {
@@ -34,11 +34,7 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
   }
 
   Future<UserModel?> _buscarUsuarioLogado() async {
-    const storage = FlutterSecureStorage();
-    final idString = await storage.read(key: 'usuario_id');
-    if (idString == null) return null;
-
-    final id = int.tryParse(idString);
+    final id = await getIt<SessionService>().getCurrentUserId();
     if (id == null) return null;
 
     return getIt<UserRepositoryInterface>().find(id);

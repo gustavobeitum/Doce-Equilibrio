@@ -1,5 +1,6 @@
+import 'package:doce_equilibrio/core/di/service_locator.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/auth/screens/login_screen.dart';
 import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
@@ -12,8 +13,6 @@ class AuthenticationSplashScreen extends StatefulWidget {
 }
 
 class _SplashVerificacaoState extends State<AuthenticationSplashScreen> {
-  final _storage = const FlutterSecureStorage();
-
   @override
   void initState() {
     super.initState();
@@ -21,7 +20,7 @@ class _SplashVerificacaoState extends State<AuthenticationSplashScreen> {
   }
 
   Future<void> _checkAuthentication() async {
-    final savedId = await _storage.read(key: 'usuario_id');
+    final savedId = await getIt<SessionService>().getCurrentUserId();
 
     await Future.delayed(const Duration(milliseconds: 500));
 

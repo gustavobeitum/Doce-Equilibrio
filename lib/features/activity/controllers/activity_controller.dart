@@ -1,24 +1,17 @@
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_model.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_type.dart';
 import 'package:doce_equilibrio/features/activity/repositories/activity_repository_interface.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ActivityController {
   final ActivityRepositoryInterface repository;
-  final FlutterSecureStorage _storage;
+  final SessionService _sessionService;
 
-  ActivityController(this.repository, {FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
-
-  Future<int?> _usuarioIdLogado() async {
-    final idString = await _storage.read(key: 'usuario_id');
-    if (idString == null) return null;
-    return int.tryParse(idString);
-  }
+  ActivityController(this.repository, this._sessionService);
 
   Future<List<ActivityModel>> listar() async {
-    final usuarioId = await _usuarioIdLogado();
+    final usuarioId = await _sessionService.getCurrentUserId();
     if (usuarioId == null) return [];
     return repository.listByUser(usuarioId);
   }
@@ -35,7 +28,7 @@ class ActivityController {
     }
 
     try {
-      final usuarioId = await _usuarioIdLogado();
+      final usuarioId = await _sessionService.getCurrentUserId();
       if (usuarioId == null) {
         return 'Sessão expirada. Faça login novamente.';
       }

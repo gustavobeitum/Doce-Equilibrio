@@ -1,4 +1,5 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
@@ -6,7 +7,6 @@ import 'package:doce_equilibrio/features/insulin/controllers/insulin_calculation
 import 'package:doce_equilibrio/features/insulin/models/insulin_calculation_result.dart';
 import 'package:doce_equilibrio/features/settings/widgets/edit_insulin_parameters_modal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 class InsulinCalculatorScreen extends StatefulWidget {
@@ -42,15 +42,11 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
   Future<void> _loadUser() async {
     setState(() => _isLoading = true);
 
-    const storage = FlutterSecureStorage();
-    final idString = await storage.read(key: 'usuario_id');
+    final userId = await getIt<SessionService>().getCurrentUserId();
     UserModel? user;
 
-    if (idString != null) {
-      final id = int.tryParse(idString);
-      if (id != null) {
-        user = await getIt<UserRepositoryInterface>().find(id);
-      }
+    if (userId != null) {
+      user = await getIt<UserRepositoryInterface>().find(userId);
     }
 
     if (!mounted) return;

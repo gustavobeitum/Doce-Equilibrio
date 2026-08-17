@@ -1,34 +1,27 @@
 import 'package:doce_equilibrio/core/errors/auth_exceptions.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/glycemia/models/glycemia_statistics.dart';
 import 'package:doce_equilibrio/features/glycemia/models/glycemia_record_model.dart';
 import 'package:doce_equilibrio/features/glycemia/repositories/glycemia_repository_interface.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class GlycemiaController {
   final GlycemiaRepositoryInterface repository;
-  final FlutterSecureStorage _storage;
+  final SessionService _sessionService;
 
-  GlycemiaController(this.repository, {FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
-
-  Future<int?> _userIdLogado() async {
-    final idString = await _storage.read(key: 'usuario_id');
-    if (idString == null) return null;
-    return int.tryParse(idString);
-  }
+  GlycemiaController(this.repository, this._sessionService);
 
   /// Lista o histórico do usuário logado, do mais recente para o mais
   /// antigo. Retorna lista vazia se não houver sessão ativa.
   Future<List<GlycemiaRecordModel>> listHistory() async {
-    final userId = await _userIdLogado();
+    final userId = await _sessionService.getCurrentUserId();
     if (userId == null) return [];
     return repository.listByUser(userId);
   }
 
   /// Busca a última leitura do usuário logado, para exibir na Home.
   Future<GlycemiaRecordModel?> findLatestReading() async {
-    final userId = await _userIdLogado();
+    final userId = await _sessionService.getCurrentUserId();
     if (userId == null) return null;
     return repository.findLatestReading(userId);
   }
@@ -63,7 +56,7 @@ class GlycemiaController {
     String? notes,
   }) async {
     try {
-      final userId = await _userIdLogado();
+      final userId = await _sessionService.getCurrentUserId();
       if (userId == null) {
         return 'Sessão expirada. Faça login novamente.';
       }

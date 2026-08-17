@@ -1,6 +1,5 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/utils/validators.dart';
-import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -9,9 +8,7 @@ import 'package:doce_equilibrio/core/widgets/custom_text_field.dart';
 import 'package:doce_equilibrio/features/auth/controllers/registration_controller.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  final UserRepositoryInterface? repository;
-
-  const RegistrationScreen({super.key, this.repository});
+  const RegistrationScreen({super.key});
 
   @override
   State<RegistrationScreen> createState() => _CadastroScreenState();
@@ -39,8 +36,7 @@ class _CadastroScreenState extends State<RegistrationScreen> {
   @override
   void initState() {
     super.initState();
-    final repo = widget.repository ?? getIt<UserRepositoryInterface>();
-    _controller = RegistrationController(repo);
+    _controller = getIt<RegistrationController>();
   }
 
   @override

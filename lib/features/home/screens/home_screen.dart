@@ -1,6 +1,5 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
-import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controller.dart';
 import 'package:doce_equilibrio/features/glycemia/models/glycemia_record_model.dart';
 import 'package:doce_equilibrio/features/home/controllers/home_controller.dart';
@@ -29,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = HomeController(getIt<UserRepositoryInterface>());
+    _controller = getIt<HomeController>();
     _glycemiaController = getIt<GlycemiaController>();
     _loadInitialData();
   }

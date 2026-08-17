@@ -1,4 +1,5 @@
 import 'package:doce_equilibrio/core/errors/auth_exceptions.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:flutter/foundation.dart';
@@ -7,9 +8,51 @@ import 'package:flutter/foundation.dart';
 /// cadastro/login em si: Metas Glicêmicas (RF-010) e Parâmetros de
 /// Insulina (RF-002 / UC-05, UC-06, UC-07).
 class ProfileController {
-  final UserRepositoryInterface repository;
+  final UserRepositoryInterface _repository;
+  final SessionService _sessionService;
 
-  ProfileController(this.repository);
+  ProfileController(this._repository, this._sessionService);
+
+  Future<UserModel?> loadCurrentUser() async {
+    final userId = await _sessionService.getCurrentUserId();
+    if (userId == null) return null;
+    return _repository.find(userId);
+  }
+
+  Future<void> updateProfile(UserModel user) {
+    return _repository.update(user);
+  }
+
+  Future<void> updateVitalData({
+    required UserModel currentUser,
+    required double weight,
+    required int height,
+  }) {
+    return _repository.update(
+      UserModel(
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email,
+        diabetesType: currentUser.diabetesType,
+        diagnosisYear: currentUser.diagnosisYear,
+        password: currentUser.password,
+        salt: currentUser.salt,
+        weight: weight,
+        height: height,
+        lowDangerThreshold: currentUser.lowDangerThreshold,
+        normalMinimumThreshold: currentUser.normalMinimumThreshold,
+        normalMaximumThreshold: currentUser.normalMaximumThreshold,
+        highDangerThreshold: currentUser.highDangerThreshold,
+        sensitivityFactor: currentUser.sensitivityFactor,
+        correctionFactor: currentUser.correctionFactor,
+        glycemiaTarget: currentUser.glycemiaTarget,
+      ),
+    );
+  }
+
+  Future<void> logout() {
+    return _sessionService.endSession();
+  }
 
   /// Atualiza os 4 limiares de classificação de glicemia do usuário.
   /// Retorna `null` em caso de sucesso, ou uma mensagem de erro.
@@ -46,7 +89,7 @@ class ProfileController {
         correctionFactor: currentUser.correctionFactor,
         glycemiaTarget: currentUser.glycemiaTarget,
       );
-      await repository.update(updated);
+      await _repository.update(updated);
       return null;
     } catch (e) {
       debugPrint('ERRO AO SALVAR METAS GLICÊMICAS: $e');
@@ -83,7 +126,7 @@ class ProfileController {
         correctionFactor: correctionFactor,
         glycemiaTarget: glycemiaTarget,
       );
-      await repository.update(updated);
+      await _repository.update(updated);
       return null;
     } catch (e) {
       debugPrint('ERRO AO SALVAR PARÂMETROS DE INSULINA: $e');

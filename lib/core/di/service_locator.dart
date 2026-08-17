@@ -7,6 +7,7 @@ import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controlle
 import 'package:doce_equilibrio/features/glycemia/repositories/glycemia_repository.dart';
 import 'package:doce_equilibrio/features/glycemia/repositories/glycemia_repository_interface.dart';
 import 'package:doce_equilibrio/core/services/notification_service.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/activity/controllers/activity_controller.dart';
 import 'package:doce_equilibrio/features/activity/repositories/activity_repository.dart';
 import 'package:doce_equilibrio/features/activity/repositories/activity_repository_interface.dart';
@@ -30,6 +31,9 @@ final GetIt getIt = GetIt.instance;
 
 void setupServiceLocator() {
   getIt.registerLazySingleton<DatabaseConnection>(() => DatabaseConnection());
+  getIt.registerLazySingleton<SessionService>(
+    () => SecureStorageSessionService(),
+  );
 
   getIt.registerLazySingleton<UserRepositoryInterface>(
     () => UserRepository(getIt<DatabaseConnection>()),
@@ -62,36 +66,64 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<NotificationService>(() => NotificationService());
 
   getIt.registerFactory<LoginController>(
-    () => LoginController(getIt<UserRepositoryInterface>()),
+    () => LoginController(
+      getIt<UserRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<RegistrationController>(
-    () => RegistrationController(getIt<UserRepositoryInterface>()),
+    () => RegistrationController(
+      getIt<UserRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<HomeController>(
-    () => HomeController(getIt<UserRepositoryInterface>()),
+    () => HomeController(
+      getIt<UserRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<GlycemiaController>(
-    () => GlycemiaController(getIt<GlycemiaRepositoryInterface>()),
+    () => GlycemiaController(
+      getIt<GlycemiaRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<ProfileController>(
-    () => ProfileController(getIt<UserRepositoryInterface>()),
+    () => ProfileController(
+      getIt<UserRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<ReminderController>(
     () => ReminderController(
       getIt<ReminderRepositoryInterface>(),
       getIt<NotificationService>(),
+      getIt<SessionService>(),
     ),
   );
   getIt.registerFactory<FoodController>(
-    () => FoodController(getIt<FoodRepositoryInterface>()),
+    () => FoodController(
+      getIt<FoodRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<MealController>(
-    () => MealController(getIt<MealRepositoryInterface>()),
+    () => MealController(
+      getIt<MealRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<MedicationController>(
-    () => MedicationController(getIt<MedicationRepositoryInterface>()),
+    () => MedicationController(
+      getIt<MedicationRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
   getIt.registerFactory<ActivityController>(
-    () => ActivityController(getIt<ActivityRepositoryInterface>()),
+    () => ActivityController(
+      getIt<ActivityRepositoryInterface>(),
+      getIt<SessionService>(),
+    ),
   );
 }

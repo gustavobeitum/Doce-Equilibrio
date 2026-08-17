@@ -1,25 +1,18 @@
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/food/models/meal_item_model.dart';
 import 'package:doce_equilibrio/features/food/models/meal_model.dart';
 import 'package:doce_equilibrio/features/food/models/meal_type.dart';
 import 'package:doce_equilibrio/features/food/repositories/meal_repository_interface.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MealController {
   final MealRepositoryInterface repository;
-  final FlutterSecureStorage _storage;
+  final SessionService _sessionService;
 
-  MealController(this.repository, {FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
-
-  Future<int?> _userIdLogado() async {
-    final idString = await _storage.read(key: 'usuario_id');
-    if (idString == null) return null;
-    return int.tryParse(idString);
-  }
+  MealController(this.repository, this._sessionService);
 
   Future<List<MealModel>> list() async {
-    final userId = await _userIdLogado();
+    final userId = await _sessionService.getCurrentUserId();
     if (userId == null) return [];
     return repository.listByUser(userId);
   }
@@ -42,7 +35,7 @@ class MealController {
     }
 
     try {
-      final userId = await _userIdLogado();
+      final userId = await _sessionService.getCurrentUserId();
       if (userId == null) {
         return 'Sessão expirada. Faça login novamente.';
       }

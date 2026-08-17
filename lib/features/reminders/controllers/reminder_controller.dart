@@ -1,29 +1,23 @@
 import 'package:doce_equilibrio/core/services/notification_service.dart';
+import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_model.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_type.dart';
 import 'package:doce_equilibrio/features/reminders/repositories/reminder_repository_interface.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ReminderController {
   final ReminderRepositoryInterface repository;
   final NotificationService _notificationService;
-  final FlutterSecureStorage _storage;
+  final SessionService _sessionService;
 
   ReminderController(
     this.repository,
-    this._notificationService, {
-    FlutterSecureStorage? storage,
-  }) : _storage = storage ?? const FlutterSecureStorage();
-
-  Future<int?> _userIdLogado() async {
-    final idString = await _storage.read(key: 'usuario_id');
-    if (idString == null) return null;
-    return int.tryParse(idString);
-  }
+    this._notificationService,
+    this._sessionService,
+  );
 
   Future<List<ReminderModel>> list() async {
-    final userId = await _userIdLogado();
+    final userId = await _sessionService.getCurrentUserId();
     if (userId == null) return [];
     return repository.listByUser(userId);
   }
@@ -70,7 +64,7 @@ class ReminderController {
     }
 
     try {
-      final userId = await _userIdLogado();
+      final userId = await _sessionService.getCurrentUserId();
       if (userId == null) {
         return 'Sessão expirada. Faça login novamente.';
       }
