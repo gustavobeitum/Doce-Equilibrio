@@ -11,7 +11,7 @@ class DatabaseConnection {
 
   static Database? _database;
 
-  static const int _databaseVersion = 8;
+  static const int _databaseVersion = 9;
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -148,6 +148,21 @@ class DatabaseConnection {
     await db.execute(
       'CREATE INDEX idx_refeicaoitem_refeicao ON RefeicaoItem (refeicaoId)',
     );
+
+    await db.execute('''
+      CREATE TABLE Atividade (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        tipo TEXT NOT NULL,
+        duracaoMinutos INTEGER NOT NULL,
+        dataHora TEXT NOT NULL,
+        observacao TEXT,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_atividade_user_data ON Atividade (usuarioId, dataHora)',
+    );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -282,6 +297,21 @@ class DatabaseConnection {
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_refeicaoitem_refeicao '
       'ON RefeicaoItem (refeicaoId)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS Atividade (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        tipo TEXT NOT NULL,
+        duracaoMinutos INTEGER NOT NULL,
+        dataHora TEXT NOT NULL,
+        observacao TEXT,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_atividade_user_data '
+      'ON Atividade (usuarioId, dataHora)',
     );
   }
 

@@ -18,6 +18,7 @@ class _AtividadeScreenState extends State<ActivityScreen> {
   late final ActivityController _controller;
 
   bool _isLoading = true;
+  String? _loadError;
   List<ActivityModel> _atividades = [];
 
   @override
@@ -28,14 +29,28 @@ class _AtividadeScreenState extends State<ActivityScreen> {
   }
 
   Future<void> _loadActivities() async {
-    setState(() => _isLoading = true);
-    final atividades = await _controller.listar();
-
-    if (!mounted) return;
     setState(() {
-      _atividades = atividades;
-      _isLoading = false;
+      _isLoading = true;
+      _loadError = null;
     });
+
+    try {
+      final atividades = await _controller.listar();
+      if (!mounted) return;
+      setState(() => _atividades = atividades);
+    } catch (error, stackTrace) {
+      debugPrint('ERRO AO CARREGAR ATIVIDADES: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (!mounted) return;
+      setState(() {
+        _atividades = [];
+        _loadError = 'Não foi possível carregar as atividades.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _openModal({ActivityModel? existingActivity}) async {
@@ -172,6 +187,33 @@ class _AtividadeScreenState extends State<ActivityScreen> {
                     ? const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primaryColor,
+                        ),
+                      )
+                    : _loadError != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                PhosphorIcons.warningCircle,
+                                size: 48,
+                                color: AppColors.dangerColor,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                _loadError!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey.shade700),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _loadActivities,
+                                child: const Text('Tentar novamente'),
+                              ),
+                            ],
+                          ),
                         ),
                       )
                     : RefreshIndicator(
