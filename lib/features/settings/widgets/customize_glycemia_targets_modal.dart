@@ -1,0 +1,298 @@
+import 'package:doce_equilibrio/core/di/service_locator.dart';
+import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/features/auth/models/user_model.dart';
+import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+
+/// Modal para o usuário personalizar as 5 faixas de classificação da
+/// glicemia (Perigo Baixo, Alerta Baixo, Normal, Alerta Alto, Perigo
+/// Alto), definidas a partir de 4 limiares.
+class CustomizeGlycemiaTargetsModal extends StatefulWidget {
+  final UserModel currentUser;
+
+  const CustomizeGlycemiaTargetsModal({super.key, required this.currentUser});
+
+  /// Abre o modal. Retorna `true` se as metas foram salvas.
+  static Future<bool?> exibir(
+    BuildContext context, {
+    required UserModel currentUser,
+  }) {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) =>
+          CustomizeGlycemiaTargetsModal(currentUser: currentUser),
+    );
+  }
+
+  @override
+  State<CustomizeGlycemiaTargetsModal> createState() =>
+      _PersonalizarMetasModalState();
+}
+
+class _PersonalizarMetasModalState
+    extends State<CustomizeGlycemiaTargetsModal> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _perigoBaixoController;
+  late final TextEditingController _normalMinimoController;
+  late final TextEditingController _normalMaximoController;
+  late final TextEditingController _perigoAltoController;
+
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = widget.currentUser;
+    _perigoBaixoController = TextEditingController(
+      text: user.lowDangerThreshold.toString(),
+    );
+    _normalMinimoController = TextEditingController(
+      text: user.normalMinimumThreshold.toString(),
+    );
+    _normalMaximoController = TextEditingController(
+      text: user.normalMaximumThreshold.toString(),
+    );
+    _perigoAltoController = TextEditingController(
+      text: user.highDangerThreshold.toString(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _perigoBaixoController.dispose();
+    _normalMinimoController.dispose();
+    _normalMaximoController.dispose();
+    _perigoAltoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Preencha todos os campos obrigatórios antes de salvar.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    final controller = getIt<ProfileController>();
+    final errorMessage = await controller.updateGlycemiaTargets(
+      currentUser: widget.currentUser,
+      lowDangerThreshold: int.parse(_perigoBaixoController.text),
+      normalMinimumThreshold: int.parse(_normalMinimoController.text),
+      normalMaximumThreshold: int.parse(_normalMaximoController.text),
+      highDangerThreshold: int.parse(_perigoAltoController.text),
+    );
+
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    if (errorMessage == null) {
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+    }
+  }
+
+  InputDecoration _fieldDecoration({String? hintText, String? sufixo}) {
+    return InputDecoration(
+      hintText: hintText,
+      suffixText: sufixo,
+      filled: true,
+      fillColor: const Color(0xFFF2F3F5),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.dangerColor, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.dangerColor, width: 2),
+      ),
+      errorStyle: const TextStyle(
+        color: AppColors.dangerColor,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
+  Widget _thresholdField({
+    required String label,
+    required String descricao,
+    required TextEditingController controller,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          descricao,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          decoration: _fieldDecoration(sufixo: 'mg/dL'),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Informe um valor.';
+            }
+            final numero = int.tryParse(value);
+            if (numero == null || numero <= 0 || numero > 999) {
+              return 'Informe um valor entre 1 e 999.';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.backgroundColor,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Personalizar Metas Glicêmicas',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => Navigator.pop(context, false),
+                          borderRadius: BorderRadius.circular(50),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4.0),
+                            child: Icon(PhosphorIcons.x, color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Esses valores definem como suas leituras de glicemia '
+                      'serão classificadas (Normal, Alerta ou Perigo).',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    _thresholdField(
+                      label: 'Perigo Baixo — abaixo de',
+                      descricao:
+                          'Risco de hipoglicemia grave. Valores abaixo disso.',
+                      controller: _perigoBaixoController,
+                    ),
+                    _thresholdField(
+                      label: 'Normal — mínimo',
+                      descricao: 'A partir daqui já é considerado normal.',
+                      controller: _normalMinimoController,
+                    ),
+                    _thresholdField(
+                      label: 'Normal — máximo',
+                      descricao: 'Até aqui ainda é considerado normal.',
+                      controller: _normalMaximoController,
+                    ),
+                    _thresholdField(
+                      label: 'Perigo Alto — acima de',
+                      descricao:
+                          'Risco de hiperglicemia grave. Valores acima disso.',
+                      controller: _perigoAltoController,
+                    ),
+
+                    ElevatedButton(
+                      onPressed: _isSaving ? null : _save,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 52),
+                        backgroundColor: AppColors.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Salvar Metas',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
