@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,7 @@ class _PersonalizarMetasModalState
   late final TextEditingController _perigoAltoController;
 
   bool _isSaving = false;
+  String? _modalError;
 
   @override
   void initState() {
@@ -72,17 +74,13 @@ class _PersonalizarMetasModalState
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Preencha todos os campos obrigatórios antes de salvar.',
-          ),
-        ),
-      );
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _modalError = null;
+    });
 
     final controller = getIt<ProfileController>();
     final errorMessage = await controller.updateGlycemiaTargets(
@@ -94,14 +92,13 @@ class _PersonalizarMetasModalState
     );
 
     if (!mounted) return;
-    setState(() => _isSaving = false);
+    setState(() {
+      _isSaving = false;
+      _modalError = errorMessage;
+    });
 
     if (errorMessage == null) {
       Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     }
   }
 
@@ -260,6 +257,11 @@ class _PersonalizarMetasModalState
                           'Risco de hiperglicemia grave. Valores acima disso.',
                       controller: _perigoAltoController,
                     ),
+
+                    if (_modalError != null) ...[
+                      ModalFeedbackMessage(message: _modalError!),
+                      const SizedBox(height: 12),
+                    ],
 
                     ElevatedButton(
                       onPressed: _isSaving ? null : _save,

@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/features/activity/controllers/activity_controller.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_model.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_type.dart';
@@ -37,6 +38,7 @@ class _AtividadeModalState extends State<ActivityModal> {
   late DateTime _data;
   late TimeOfDay _hora;
   bool _isSaving = false;
+  String? _modalError;
 
   bool get _isEditing => widget.existingActivity != null;
 
@@ -89,17 +91,13 @@ class _AtividadeModalState extends State<ActivityModal> {
 
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Preencha todos os campos obrigatórios antes de salvar.',
-          ),
-        ),
-      );
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _modalError = null;
+    });
 
     final dataHora = DateTime(
       _data.year,
@@ -119,14 +117,13 @@ class _AtividadeModalState extends State<ActivityModal> {
     );
 
     if (!mounted) return;
-    setState(() => _isSaving = false);
+    setState(() {
+      _isSaving = false;
+      _modalError = mensagemErro;
+    });
 
     if (mensagemErro == null) {
       Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(mensagemErro)));
     }
   }
 
@@ -377,6 +374,11 @@ class _AtividadeModalState extends State<ActivityModal> {
                       ),
                     ),
                     const SizedBox(height: 28),
+
+                    if (_modalError != null) ...[
+                      ModalFeedbackMessage(message: _modalError!),
+                      const SizedBox(height: 12),
+                    ],
 
                     ElevatedButton(
                       onPressed: _isSaving ? null : _salvar,

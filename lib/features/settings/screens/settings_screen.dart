@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/features/settings/screens/edit_profile_screen.da
 import 'package:flutter/material.dart';
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/features/auth/screens/login_screen.dart';
 import 'package:doce_equilibrio/features/settings/widgets/config_header.dart';
 import 'package:doce_equilibrio/features/settings/widgets/vital_data_card.dart';
@@ -71,6 +72,7 @@ class _ConfigScreenState extends State<SettingsScreen> {
       text: _user!.height != null ? _user!.height.toString() : '',
     );
     final formKey = GlobalKey<FormState>();
+    String? modalError;
 
     final atualizou = await showDialog<bool>(
       context: context,
@@ -137,6 +139,10 @@ class _ConfigScreenState extends State<SettingsScreen> {
                         return null;
                       },
                     ),
+                    if (modalError != null) ...[
+                      const SizedBox(height: 16),
+                      ModalFeedbackMessage(message: modalError!),
+                    ],
                   ],
                 ),
               ),
@@ -186,14 +192,24 @@ class _ConfigScreenState extends State<SettingsScreen> {
                                     heightController.text,
                                   );
 
-                                  await _controller.updateVitalData(
-                                    currentUser: _user!,
-                                    weight: formattedWeight,
-                                    height: formattedHeight,
-                                  );
+                                  try {
+                                    await _controller.updateVitalData(
+                                      currentUser: _user!,
+                                      weight: formattedWeight,
+                                      height: formattedHeight,
+                                    );
 
-                                  if (context.mounted) {
-                                    Navigator.pop(context, true);
+                                    if (context.mounted) {
+                                      Navigator.pop(context, true);
+                                    }
+                                  } catch (_) {
+                                    if (context.mounted) {
+                                      setStateDialog(() {
+                                        isSaving = false;
+                                        modalError =
+                                            'Não foi possível salvar os dados. Tente novamente.';
+                                      });
+                                    }
                                   }
                                 }
                               },

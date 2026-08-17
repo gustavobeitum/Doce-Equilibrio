@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/features/reminders/controllers/reminder_controller.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_model.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_type.dart';
@@ -51,6 +52,7 @@ class _LembreteModalState extends State<ReminderModal> {
   final Set<int> _selectedDays = {};
   late DateTime _date;
   bool _isSaving = false;
+  String? _modalError;
   bool _tituloEditadoManualmente = false;
 
   bool get _isEditing => widget.existingReminder != null;
@@ -87,7 +89,10 @@ class _LembreteModalState extends State<ReminderModal> {
       initialTime: _time,
     );
     if (horaEscolhida != null) {
-      setState(() => _time = horaEscolhida);
+      setState(() {
+        _time = horaEscolhida;
+        _modalError = null;
+      });
     }
   }
 
@@ -99,12 +104,16 @@ class _LembreteModalState extends State<ReminderModal> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (dataEscolhida != null) {
-      setState(() => _date = dataEscolhida);
+      setState(() {
+        _date = dataEscolhida;
+        _modalError = null;
+      });
     }
   }
 
   void _toggleDay(int weekday) {
     setState(() {
+      _modalError = null;
       if (_selectedDays.contains(weekday)) {
         _selectedDays.remove(weekday);
       } else {
@@ -152,19 +161,18 @@ class _LembreteModalState extends State<ReminderModal> {
     final validDays = !_repeat || _selectedDays.isNotEmpty;
 
     if (!validForm || !validDays) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            !validDays
-                ? 'Selecione ao menos um dia da semana.'
-                : 'Preencha todos os campos obrigatórios antes de salvar.',
-          ),
-        ),
-      );
+      setState(() {
+        _modalError = !validDays
+            ? 'Selecione ao menos um dia da semana.'
+            : null;
+      });
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _modalError = null;
+    });
 
     final controller = getIt<ReminderController>();
     final errorMessage = await controller.save(
@@ -180,14 +188,13 @@ class _LembreteModalState extends State<ReminderModal> {
     );
 
     if (!mounted) return;
-    setState(() => _isSaving = false);
+    setState(() {
+      _isSaving = false;
+      _modalError = errorMessage;
+    });
 
     if (errorMessage == null) {
       Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     }
   }
 
@@ -384,7 +391,10 @@ class _LembreteModalState extends State<ReminderModal> {
                           child: _frequencyButton(
                             label: 'Repetir semanalmente',
                             selected: _repeat,
-                            onTap: () => setState(() => _repeat = true),
+                            onTap: () => setState(() {
+                              _repeat = true;
+                              _modalError = null;
+                            }),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -392,7 +402,10 @@ class _LembreteModalState extends State<ReminderModal> {
                           child: _frequencyButton(
                             label: 'Uma vez',
                             selected: !_repeat,
-                            onTap: () => setState(() => _repeat = false),
+                            onTap: () => setState(() {
+                              _repeat = false;
+                              _modalError = null;
+                            }),
                           ),
                         ),
                       ],
@@ -486,6 +499,11 @@ class _LembreteModalState extends State<ReminderModal> {
                       ),
                     ],
                     const SizedBox(height: 28),
+
+                    if (_modalError != null) ...[
+                      ModalFeedbackMessage(message: _modalError!),
+                      const SizedBox(height: 12),
+                    ],
 
                     ElevatedButton(
                       onPressed: _isSaving ? null : _save,

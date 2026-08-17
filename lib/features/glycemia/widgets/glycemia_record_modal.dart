@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/core/utils/formatters.dart';
 import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controller.dart';
 import 'package:doce_equilibrio/features/glycemia/models/glycemia_record_model.dart';
@@ -45,6 +46,7 @@ class _RegistroGlicemiaModalState extends State<GlycemiaRecordModal> {
   late DateTime _date;
   late TimeOfDay _time;
   bool _isSaving = false;
+  String? _modalError;
 
   bool get _isEditing => widget.existingRecord != null;
 
@@ -97,17 +99,13 @@ class _RegistroGlicemiaModalState extends State<GlycemiaRecordModal> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Preencha todos os campos obrigatórios antes de salvar.',
-          ),
-        ),
-      );
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _modalError = null;
+    });
 
     final dateTime = DateTime(
       _date.year,
@@ -127,14 +125,13 @@ class _RegistroGlicemiaModalState extends State<GlycemiaRecordModal> {
     );
 
     if (!mounted) return;
-    setState(() => _isSaving = false);
+    setState(() {
+      _isSaving = false;
+      _modalError = errorMessage;
+    });
 
     if (errorMessage == null) {
       Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     }
   }
 
@@ -378,6 +375,11 @@ class _RegistroGlicemiaModalState extends State<GlycemiaRecordModal> {
                       ),
                     ),
                     const SizedBox(height: 28),
+
+                    if (_modalError != null) ...[
+                      ModalFeedbackMessage(message: _modalError!),
+                      const SizedBox(height: 12),
+                    ],
 
                     ElevatedButton(
                       onPressed: _isSaving ? null : _save,
