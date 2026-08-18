@@ -56,6 +56,7 @@ class _ConfigScreenState extends State<SettingsScreen> {
       ),
     );
 
+    if (!mounted) return;
     if (atualizou == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();
@@ -246,6 +247,10 @@ class _ConfigScreenState extends State<SettingsScreen> {
       },
     );
 
+    weightController.dispose();
+    heightController.dispose();
+
+    if (!mounted) return;
     if (atualizou == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();
@@ -274,6 +279,7 @@ class _ConfigScreenState extends State<SettingsScreen> {
       currentUser: _user!,
     );
 
+    if (!mounted) return;
     if (saved == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();
@@ -288,6 +294,7 @@ class _ConfigScreenState extends State<SettingsScreen> {
       currentUser: _user!,
     );
 
+    if (!mounted) return;
     if (saved == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();

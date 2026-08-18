@@ -64,6 +64,7 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
       currentUser: _user!,
     );
 
+    if (!mounted) return;
     if (saved == true) {
       // Os parâmetros mudaram — qualquer resultado calculado antes já não
       // reflete mais a configuração atual.
