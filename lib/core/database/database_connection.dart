@@ -11,7 +11,7 @@ class DatabaseConnection {
 
   static Database? _database;
 
-  static const int _databaseVersion = 9;
+  static const int _databaseVersion = 10;
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -163,6 +163,22 @@ class DatabaseConnection {
     await db.execute(
       'CREATE INDEX idx_atividade_user_data ON Atividade (usuarioId, dataHora)',
     );
+
+    await db.execute('''
+      CREATE TABLE Medicamento (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        nome TEXT NOT NULL,
+        dosagem TEXT NOT NULL,
+        dataHora TEXT NOT NULL,
+        observacao TEXT,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_medicamento_user_data '
+      'ON Medicamento (usuarioId, dataHora)',
+    );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -312,6 +328,21 @@ class DatabaseConnection {
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_atividade_user_data '
       'ON Atividade (usuarioId, dataHora)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS Medicamento (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        nome TEXT NOT NULL,
+        dosagem TEXT NOT NULL,
+        dataHora TEXT NOT NULL,
+        observacao TEXT,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_medicamento_user_data '
+      'ON Medicamento (usuarioId, dataHora)',
     );
   }
 
