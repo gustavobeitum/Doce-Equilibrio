@@ -1,7 +1,7 @@
 import 'package:doce_equilibrio/core/database/database_connection.dart';
-import 'package:doce_equilibrio/features/food/models/meal_item_model.dart';
-import 'package:doce_equilibrio/features/food/models/meal_model.dart';
-import 'package:doce_equilibrio/features/food/repositories/meal_repository_interface.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
+import 'package:doce_equilibrio/features/meals/repositories/meal_repository_interface.dart';
 
 class MealRepository implements MealRepositoryInterface {
   final DatabaseConnection _dbConnection;
@@ -46,6 +46,17 @@ class MealRepository implements MealRepositoryInterface {
       }
     });
     return meal.id!;
+  }
+
+  @override
+  Future<int> setFavorite(int id, bool favorite) async {
+    final db = await _dbConnection.database;
+    return db.update(
+      'Refeicao',
+      {'favorita': favorite ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   @override

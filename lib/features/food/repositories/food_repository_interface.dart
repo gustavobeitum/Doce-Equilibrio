@@ -5,4 +5,5 @@ abstract class FoodRepositoryInterface {
   Future<int> update(FoodModel food);
   Future<int> delete(int id);
   Future<List<FoodModel>> listByUser(int userId);
+  Future<List<FoodModel>> searchByName(int userId, String query);
 }

@@ -50,4 +50,20 @@ class MealItemModel {
       quantityGrams: (map['quantidadeGramas'] as num).toDouble(),
     );
   }
+
+  MealItemModel copyWith({
+    int? id,
+    int? mealId,
+    double? quantityGrams,
+    bool clearPersistenceIds = false,
+  }) {
+    return MealItemModel(
+      id: clearPersistenceIds ? null : id ?? this.id,
+      mealId: clearPersistenceIds ? null : mealId ?? this.mealId,
+      foodId: foodId,
+      foodName: foodName,
+      carbohydratesPer100g: carbohydratesPer100g,
+      quantityGrams: quantityGrams ?? this.quantityGrams,
+    );
+  }
 }

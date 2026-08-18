@@ -41,4 +41,16 @@ class FoodRepository implements FoodRepositoryInterface {
     );
     return maps.map((map) => FoodModel.fromMap(map)).toList();
   }
+
+  @override
+  Future<List<FoodModel>> searchByName(int userId, String query) async {
+    final db = await _dbConnection.database;
+    final maps = await db.query(
+      'Alimento',
+      where: 'usuarioId = ? AND nome LIKE ?',
+      whereArgs: [userId, '%${query.trim()}%'],
+      orderBy: 'nome ASC',
+    );
+    return maps.map(FoodModel.fromMap).toList();
+  }
 }

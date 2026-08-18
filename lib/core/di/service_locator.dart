@@ -13,11 +13,13 @@ import 'package:doce_equilibrio/features/activity/controllers/activity_controlle
 import 'package:doce_equilibrio/features/activity/repositories/activity_repository.dart';
 import 'package:doce_equilibrio/features/activity/repositories/activity_repository_interface.dart';
 import 'package:doce_equilibrio/features/food/controllers/food_controller.dart';
-import 'package:doce_equilibrio/features/food/controllers/meal_controller.dart';
+import 'package:doce_equilibrio/features/food/navigation/food_library_navigator.dart';
 import 'package:doce_equilibrio/features/food/repositories/food_repository.dart';
 import 'package:doce_equilibrio/features/food/repositories/food_repository_interface.dart';
-import 'package:doce_equilibrio/features/food/repositories/meal_repository_interface.dart';
-import 'package:doce_equilibrio/features/food/repositories/meal_repository.dart';
+import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
+import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.dart';
+import 'package:doce_equilibrio/features/meals/repositories/meal_repository_interface.dart';
+import 'package:doce_equilibrio/features/meals/repositories/meal_repository.dart';
 import 'package:doce_equilibrio/features/home/controllers/home_controller.dart';
 import 'package:doce_equilibrio/features/medication/controllers/medication_controller.dart';
 import 'package:doce_equilibrio/features/medication/repositories/medication_repository_interface.dart';
@@ -51,6 +53,10 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<FoodRepositoryInterface>(
     () => FoodRepository(getIt<DatabaseConnection>()),
+  );
+
+  getIt.registerLazySingleton<FoodLibraryNavigator>(
+    () => FlutterFoodLibraryNavigator(),
   );
 
   getIt.registerLazySingleton<MealRepositoryInterface>(
@@ -125,6 +131,13 @@ void setupServiceLocator() {
     () => MealController(
       getIt<MealRepositoryInterface>(),
       getIt<SessionService>(),
+    ),
+  );
+  getIt.registerFactory<MealFoodController>(
+    () => MealFoodController(
+      getIt<FoodRepositoryInterface>(),
+      getIt<SessionService>(),
+      getIt<FoodLibraryNavigator>(),
     ),
   );
   getIt.registerFactory<MedicationController>(

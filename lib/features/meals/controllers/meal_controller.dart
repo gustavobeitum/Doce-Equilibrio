@@ -1,8 +1,9 @@
 import 'package:doce_equilibrio/core/services/session_service.dart';
-import 'package:doce_equilibrio/features/food/models/meal_item_model.dart';
-import 'package:doce_equilibrio/features/food/models/meal_model.dart';
-import 'package:doce_equilibrio/features/food/models/meal_type.dart';
-import 'package:doce_equilibrio/features/food/repositories/meal_repository_interface.dart';
+import 'package:doce_equilibrio/features/meals/domain/services/carbohydrate_calculator.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_type.dart';
+import 'package:doce_equilibrio/features/meals/repositories/meal_repository_interface.dart';
 import 'package:flutter/foundation.dart';
 
 class MealController {
@@ -18,9 +19,21 @@ class MealController {
   }
 
   /// Refeições marcadas como favoritas (UC-14), pra reaproveitar depois.
-  Future<List<MealModel>> listarFavoritas() async {
+  Future<List<MealModel>> listFavorites() async {
     final meals = await list();
     return meals.where((meal) => meal.favorite).toList();
+  }
+
+  List<MealItemModel> reuseFavoriteItems(MealModel favorite) {
+    return favorite.items
+        .map((item) => item.copyWith(clearPersistenceIds: true))
+        .toList();
+  }
+
+  double totalCarbohydrates(Iterable<MealItemModel> items) {
+    return CarbohydrateCalculator.total(
+      items.map((item) => item.carbohydrates),
+    );
   }
 
   Future<String?> save({
@@ -67,6 +80,15 @@ class MealController {
       return affectedRows > 0;
     } catch (e) {
       debugPrint('ERRO AO EXCLUIR REFEIÇÃO: $e');
+      return false;
+    }
+  }
+
+  Future<bool> setFavorite(int id, bool favorite) async {
+    try {
+      return await repository.setFavorite(id, favorite) > 0;
+    } catch (e) {
+      debugPrint('ERRO AO ATUALIZAR FAVORITA: $e');
       return false;
     }
   }

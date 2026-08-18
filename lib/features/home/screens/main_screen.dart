@@ -1,6 +1,6 @@
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/activity/screens/activity_screen.dart';
-import 'package:doce_equilibrio/features/food/screens/foods_screen.dart';
+import 'package:doce_equilibrio/features/meals/screens/meals_screen.dart';
 import 'package:doce_equilibrio/features/insulin/screens/insulin_calculator_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -25,7 +25,7 @@ class _MainScreenState extends State<MainScreen> {
     final telas = [
       HomeScreen(onNavegarParaInsulina: _irParaAbaInsulina),
       const InsulinCalculatorScreen(),
-      const FoodsScreen(),
+      const MealsScreen(),
       const ActivityScreen(),
     ];
 

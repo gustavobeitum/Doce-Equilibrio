@@ -16,9 +16,12 @@ class FoodLibraryScreen extends StatefulWidget {
 
 class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
   late final FoodController _controller;
+  final _searchController = TextEditingController();
 
   bool _isLoading = true;
   List<FoodModel> _foods = [];
+  String _query = '';
+  int _searchRevision = 0;
 
   @override
   void initState() {
@@ -27,14 +30,31 @@ class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
     _loadFoods();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadFoods() async {
     setState(() => _isLoading = true);
-    final foods = await _controller.list();
+    final revision = ++_searchRevision;
+    final foods = await _controller.search(_query);
 
-    if (!mounted) return;
+    if (!mounted || revision != _searchRevision) return;
     setState(() {
       _foods = foods;
       _isLoading = false;
+    });
+  }
+
+  Future<void> _searchFoods(String query) async {
+    final revision = ++_searchRevision;
+    final foods = await _controller.search(query);
+    if (!mounted || revision != _searchRevision) return;
+    setState(() {
+      _query = query.trim();
+      _foods = foods;
     });
   }
 
@@ -218,6 +238,32 @@ class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _searchController,
+                              onChanged: _searchFoods,
+                              decoration: InputDecoration(
+                                hintText: 'Buscar alimento',
+                                prefixIcon: const Icon(
+                                  PhosphorIcons.magnifyingGlass,
+                                ),
+                                suffixIcon: _query.isEmpty
+                                    ? null
+                                    : IconButton(
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          _searchFoods('');
+                                        },
+                                        icon: const Icon(PhosphorIcons.x),
+                                      ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
                             const SizedBox(height: 24),
                             if (_foods.isEmpty)
                               Padding(
@@ -233,7 +279,9 @@ class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
                                     ),
                                     const SizedBox(height: 12),
                                     Text(
-                                      'Nenhum alimento cadastrado.\nToque em "Novo Alimento" para começar.',
+                                      _query.isEmpty
+                                          ? 'Nenhum alimento cadastrado.\nToque em "Novo Alimento" para começar.'
+                                          : 'Nenhum alimento encontrado.',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.grey.shade600,

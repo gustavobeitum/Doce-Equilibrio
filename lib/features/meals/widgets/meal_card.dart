@@ -1,5 +1,5 @@
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
-import 'package:doce_equilibrio/features/food/models/meal_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
@@ -8,6 +8,7 @@ class MealCard extends StatelessWidget {
   final VoidCallback onEditar;
   final VoidCallback onExcluir;
   final VoidCallback onAlternarFavorita;
+  final VoidCallback? onUsarFavorita;
 
   const MealCard({
     super.key,
@@ -15,6 +16,7 @@ class MealCard extends StatelessWidget {
     required this.onEditar,
     required this.onExcluir,
     required this.onAlternarFavorita,
+    this.onUsarFavorita,
   });
 
   String _formatDate(DateTime date) {
@@ -156,6 +158,21 @@ class MealCard extends StatelessWidget {
               ),
             ],
           ),
+          if (onUsarFavorita != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onUsarFavorita,
+                icon: const Icon(PhosphorIcons.copy, size: 18),
+                label: const Text('Usar novamente'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primaryColor,
+                  side: const BorderSide(color: AppColors.primaryColor),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

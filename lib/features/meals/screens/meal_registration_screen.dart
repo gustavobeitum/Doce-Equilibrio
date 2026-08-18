@@ -1,17 +1,26 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
-import 'package:doce_equilibrio/features/food/controllers/meal_controller.dart';
-import 'package:doce_equilibrio/features/food/models/meal_item_model.dart';
-import 'package:doce_equilibrio/features/food/models/meal_model.dart';
-import 'package:doce_equilibrio/features/food/models/meal_type.dart';
-import 'package:doce_equilibrio/features/food/widgets/food_selection_modal.dart';
+import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_type.dart';
+import 'package:doce_equilibrio/features/meals/widgets/meal_food_selection_modal.dart';
+import 'package:doce_equilibrio/features/meals/widgets/favorite_meal_selection_modal.dart';
+import 'package:doce_equilibrio/features/meals/widgets/meal_item_quantity_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 class MealRegistrationScreen extends StatefulWidget {
   final MealModel? existingMeal;
+  final MealType? initialType;
+  final List<MealItemModel> initialItems;
 
-  const MealRegistrationScreen({super.key, this.existingMeal});
+  const MealRegistrationScreen({
+    super.key,
+    this.existingMeal,
+    this.initialType,
+    this.initialItems = const [],
+  });
 
   @override
   State<MealRegistrationScreen> createState() =>
@@ -19,6 +28,7 @@ class MealRegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
+  late final MealController _controller;
   late MealType _selectedType;
   late DateTime _date;
   late TimeOfDay _time;
@@ -31,6 +41,7 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
   @override
   void initState() {
     super.initState();
+    _controller = getIt<MealController>();
     final meal = widget.existingMeal;
 
     if (meal != null) {
@@ -41,16 +52,15 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
       _favorita = meal.favorite;
     } else {
       final now = DateTime.now();
-      _selectedType = MealType.almoco;
+      _selectedType = widget.initialType ?? MealType.almoco;
       _date = now;
       _time = TimeOfDay.fromDateTime(now);
-      _items = [];
+      _items = List.from(widget.initialItems);
       _favorita = false;
     }
   }
 
-  double get _totalCarboidratos =>
-      _items.fold(0.0, (sum, item) => sum + item.carbohydrates);
+  double get _totalCarboidratos => _controller.totalCarbohydrates(_items);
 
   String _formatNumber(double value) {
     return value == value.roundToDouble()
@@ -81,14 +91,64 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
   }
 
   Future<void> _addFood() async {
-    final item = await FoodSelectionModal.exibir(context);
+    final item = await MealFoodSelectionModal.exibir(context);
     if (item != null) {
       setState(() => _items.add(item));
     }
   }
 
+  Future<void> _useFavorite() async {
+    final favorite = await FavoriteMealSelectionModal.show(
+      context,
+      _controller,
+    );
+    if (favorite == null || !mounted) return;
+
+    if (_items.isNotEmpty) {
+      final replace = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Substituir alimentos?'),
+          content: const Text(
+            'Os alimentos adicionados serão substituídos pelos itens da '
+            'refeição favorita.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Substituir'),
+            ),
+          ],
+        ),
+      );
+      if (replace != true || !mounted) return;
+    }
+
+    setState(() {
+      _selectedType = favorite.type;
+      _items = _controller.reuseFavoriteItems(favorite);
+    });
+  }
+
   void _removeItem(int index) {
     setState(() => _items.removeAt(index));
+  }
+
+  Future<void> _editItemQuantity(int index) async {
+    final item = _items[index];
+    final quantity = await MealItemQuantityDialog.show(
+      context,
+      foodName: item.foodName,
+      initialQuantity: item.quantityGrams,
+    );
+    if (quantity == null || !mounted) return;
+    setState(() {
+      _items[index] = item.copyWith(quantityGrams: quantity);
+    });
   }
 
   Future<void> _save() async {
@@ -111,8 +171,7 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
       _time.minute,
     );
 
-    final controller = getIt<MealController>();
-    final errorMessage = await controller.save(
+    final errorMessage = await _controller.save(
       id: widget.existingMeal?.id,
       type: _selectedType,
       dateTime: dateTime,
@@ -301,6 +360,29 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
                     ),
                     const SizedBox(height: 24),
 
+                    if (!_isEditing) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          key: const ValueKey('use-favorite-meal-button'),
+                          onPressed: _useFavorite,
+                          icon: const Icon(PhosphorIcons.star, size: 19),
+                          label: const Text('Usar refeição favorita'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 50),
+                            foregroundColor: AppColors.primaryColor,
+                            side: const BorderSide(
+                              color: AppColors.primaryColor,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -387,17 +469,34 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
                                       ],
                                     ),
                                   ),
-                                  InkWell(
-                                    onTap: () => _removeItem(index),
-                                    borderRadius: BorderRadius.circular(50),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(4.0),
-                                      child: Icon(
-                                        PhosphorIcons.trash,
-                                        color: Colors.red.shade400,
-                                        size: 20,
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: () => _editItemQuantity(index),
+                                        borderRadius: BorderRadius.circular(50),
+                                        child: const Padding(
+                                          padding: EdgeInsets.all(4.0),
+                                          child: Icon(
+                                            PhosphorIcons.pencilSimple,
+                                            color: Colors.grey,
+                                            size: 20,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(width: 4),
+                                      InkWell(
+                                        onTap: () => _removeItem(index),
+                                        borderRadius: BorderRadius.circular(50),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Icon(
+                                            PhosphorIcons.trash,
+                                            color: Colors.red.shade400,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -437,22 +536,26 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: _favorita,
-                      onChanged: (value) => setState(() => _favorita = value),
-                      activeTrackColor: AppColors.primaryColor,
-                      title: const Text(
-                        'Marcar como favorita',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: const Text(
-                        'Fica em destaque pra reaproveitar depois',
+                    Material(
+                      color: Colors.transparent,
+                      child: SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: _favorita,
+                        onChanged: (value) => setState(() => _favorita = value),
+                        activeTrackColor: AppColors.primaryColor,
+                        title: const Text(
+                          'Marcar como favorita',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: const Text(
+                          'Fica em destaque pra reaproveitar depois',
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
 
                     ElevatedButton(
+                      key: const ValueKey('save-meal-button'),
                       onPressed: _isSaving ? null : _save,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(0, 52),

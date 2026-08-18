@@ -1,21 +1,22 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
-import 'package:doce_equilibrio/features/food/controllers/meal_controller.dart';
-import 'package:doce_equilibrio/features/food/models/meal_model.dart';
-import 'package:doce_equilibrio/features/food/screens/food_library_screen.dart';
-import 'package:doce_equilibrio/features/food/screens/meal_registration_screen.dart';
-import 'package:doce_equilibrio/features/food/widgets/meal_card.dart';
+import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.dart';
+import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
+import 'package:doce_equilibrio/features/meals/screens/meal_registration_screen.dart';
+import 'package:doce_equilibrio/features/meals/widgets/meal_card.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
-class FoodsScreen extends StatefulWidget {
-  const FoodsScreen({super.key});
+class MealsScreen extends StatefulWidget {
+  const MealsScreen({super.key});
 
   @override
-  State<FoodsScreen> createState() => _FoodsScreenState();
+  State<MealsScreen> createState() => _MealsScreenState();
 }
 
-class _FoodsScreenState extends State<FoodsScreen> {
+class _MealsScreenState extends State<MealsScreen> {
   late final MealController _controller;
 
   bool _isLoading = true;
@@ -39,12 +40,21 @@ class _FoodsScreenState extends State<FoodsScreen> {
     });
   }
 
-  Future<void> _abrirRegistrarRefeicao({MealModel? existingMeal}) async {
+  Future<void> _abrirRegistrarRefeicao({
+    MealModel? existingMeal,
+    MealModel? favoriteTemplate,
+  }) async {
+    final initialItems = favoriteTemplate == null
+        ? const <MealItemModel>[]
+        : _controller.reuseFavoriteItems(favoriteTemplate);
     final saved = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            MealRegistrationScreen(existingMeal: existingMeal),
+        builder: (context) => MealRegistrationScreen(
+          existingMeal: existingMeal,
+          initialType: favoriteTemplate?.type,
+          initialItems: initialItems,
+        ),
       ),
     );
     if (saved == true) {
@@ -52,11 +62,12 @@ class _FoodsScreenState extends State<FoodsScreen> {
     }
   }
 
+  Future<void> _useFavorite(MealModel meal) {
+    return _abrirRegistrarRefeicao(favoriteTemplate: meal);
+  }
+
   Future<void> _openLibrary() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FoodLibraryScreen()),
-    );
+    await getIt<MealFoodController>().openFoodLibrary(context);
     // A biblioteca não muda as refeições já registradas (o valor é um
     // retrato do momento do registro), então não precisa recarregar aqui.
   }
@@ -69,15 +80,11 @@ class _FoodsScreenState extends State<FoodsScreen> {
       }
     });
 
-    final errorMessage = await _controller.save(
-      id: meal.id,
-      type: meal.type,
-      dateTime: meal.dateTime,
-      items: meal.items,
-      favorite: !meal.favorite,
-    );
+    final updated =
+        meal.id != null &&
+        await _controller.setFavorite(meal.id!, !meal.favorite);
 
-    if (errorMessage != null) {
+    if (!updated) {
       await _carregarRefeicoes();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -328,6 +335,9 @@ class _FoodsScreenState extends State<FoodsScreen> {
                                   onExcluir: () => _confirmDeletion(meal),
                                   onAlternarFavorita: () =>
                                       _alternarFavorita(meal),
+                                  onUsarFavorita: meal.favorite
+                                      ? () => _useFavorite(meal)
+                                      : null,
                                 ),
                               ),
                           ],

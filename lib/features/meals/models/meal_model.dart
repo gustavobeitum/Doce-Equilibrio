@@ -1,5 +1,5 @@
-import 'package:doce_equilibrio/features/food/models/meal_item_model.dart';
-import 'package:doce_equilibrio/features/food/models/meal_type.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_type.dart';
 import 'package:doce_equilibrio/features/meals/domain/services/carbohydrate_calculator.dart';
 
 /// Uma refeição registrada (UC-12), com os alimentos que a compõem.

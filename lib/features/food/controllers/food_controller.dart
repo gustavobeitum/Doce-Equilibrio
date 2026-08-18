@@ -15,6 +15,13 @@ class FoodController {
     return repository.listByUser(userId);
   }
 
+  Future<List<FoodModel>> search(String query) async {
+    if (query.trim().isEmpty) return list();
+    final userId = await _sessionService.getCurrentUserId();
+    if (userId == null) return [];
+    return repository.searchByName(userId, query);
+  }
+
   Future<String?> save({
     int? id,
     required String name,
