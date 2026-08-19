@@ -23,9 +23,7 @@ class GlycemiaRecordCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final classification = GlycemiaClassification.classify(
       record.value,
-      lowDangerThreshold: user.lowDangerThreshold,
-      normalMinimumThreshold: user.normalMinimumThreshold,
-      normalMaximumThreshold: user.normalMaximumThreshold,
+      lowAlertThreshold: user.normalMinimumThreshold,
       highDangerThreshold: user.highDangerThreshold,
     );
 

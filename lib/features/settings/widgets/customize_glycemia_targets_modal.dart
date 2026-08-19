@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
-/// Modal para o usuário personalizar as 5 faixas de classificação da
-/// glicemia (Perigo Baixo, Alerta Baixo, Normal, Alerta Alto, Perigo
-/// Alto), definidas a partir de 4 limiares.
+/// Modal para personalizar os limites das três classificações glicêmicas.
 class CustomizeGlycemiaTargetsModal extends StatefulWidget {
   final UserModel currentUser;
 
@@ -37,10 +35,8 @@ class CustomizeGlycemiaTargetsModal extends StatefulWidget {
 class _PersonalizarMetasModalState
     extends State<CustomizeGlycemiaTargetsModal> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _perigoBaixoController;
-  late final TextEditingController _normalMinimoController;
-  late final TextEditingController _normalMaximoController;
-  late final TextEditingController _perigoAltoController;
+  late final TextEditingController _lowAlertController;
+  late final TextEditingController _highDangerController;
 
   bool _isSaving = false;
   String? _modalError;
@@ -49,26 +45,18 @@ class _PersonalizarMetasModalState
   void initState() {
     super.initState();
     final user = widget.currentUser;
-    _perigoBaixoController = TextEditingController(
-      text: user.lowDangerThreshold.toString(),
-    );
-    _normalMinimoController = TextEditingController(
+    _lowAlertController = TextEditingController(
       text: user.normalMinimumThreshold.toString(),
     );
-    _normalMaximoController = TextEditingController(
-      text: user.normalMaximumThreshold.toString(),
-    );
-    _perigoAltoController = TextEditingController(
+    _highDangerController = TextEditingController(
       text: user.highDangerThreshold.toString(),
     );
   }
 
   @override
   void dispose() {
-    _perigoBaixoController.dispose();
-    _normalMinimoController.dispose();
-    _normalMaximoController.dispose();
-    _perigoAltoController.dispose();
+    _lowAlertController.dispose();
+    _highDangerController.dispose();
     super.dispose();
   }
 
@@ -85,10 +73,8 @@ class _PersonalizarMetasModalState
     final controller = getIt<ProfileController>();
     final errorMessage = await controller.updateGlycemiaTargets(
       currentUser: widget.currentUser,
-      lowDangerThreshold: int.parse(_perigoBaixoController.text),
-      normalMinimumThreshold: int.parse(_normalMinimoController.text),
-      normalMaximumThreshold: int.parse(_normalMaximoController.text),
-      highDangerThreshold: int.parse(_perigoAltoController.text),
+      lowAlertThreshold: int.parse(_lowAlertController.text),
+      highDangerThreshold: int.parse(_highDangerController.text),
     );
 
     if (!mounted) return;
@@ -226,7 +212,7 @@ class _PersonalizarMetasModalState
                     const SizedBox(height: 8),
                     Text(
                       'Esses valores definem como suas leituras de glicemia '
-                      'serão classificadas (Normal, Alerta ou Perigo).',
+                      'serão classificadas como Hipoglicemia, Normal ou Hiperglicemia.',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade600,
@@ -236,26 +222,14 @@ class _PersonalizarMetasModalState
                     const SizedBox(height: 24),
 
                     _thresholdField(
-                      label: 'Perigo Baixo — abaixo de',
-                      descricao:
-                          'Risco de hipoglicemia grave. Valores abaixo disso.',
-                      controller: _perigoBaixoController,
+                      label: 'Hipoglicemia — abaixo de',
+                      descricao: 'Valores abaixo deste limite.',
+                      controller: _lowAlertController,
                     ),
                     _thresholdField(
-                      label: 'Normal — mínimo',
-                      descricao: 'A partir daqui já é considerado normal.',
-                      controller: _normalMinimoController,
-                    ),
-                    _thresholdField(
-                      label: 'Normal — máximo',
-                      descricao: 'Até aqui ainda é considerado normal.',
-                      controller: _normalMaximoController,
-                    ),
-                    _thresholdField(
-                      label: 'Perigo Alto — acima de',
-                      descricao:
-                          'Risco de hiperglicemia grave. Valores acima disso.',
-                      controller: _perigoAltoController,
+                      label: 'Hiperglicemia — acima de',
+                      descricao: 'Valores acima deste limite.',
+                      controller: _highDangerController,
                     ),
 
                     if (_modalError != null) ...[

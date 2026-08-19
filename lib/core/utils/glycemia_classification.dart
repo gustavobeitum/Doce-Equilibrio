@@ -18,35 +18,28 @@ class GlycemiaClassificationInfo {
 class GlycemiaClassification {
   GlycemiaClassification._();
 
-  static const Color corPerigo = Color(0xFFE53935);
-  static const Color corAlertaBaixo = Color(0xFFFFB300);
-  static const Color corAlertaAlto = Color(0xFFFB8C00);
+  static const Color corHipoglicemia = Color(0xFFE53935);
+  static const Color corHiperglicemia = Color(0xFFFFB300);
   static const Color corNormal = Color(0xFF4CAF50);
 
   static GlycemiaClassificationInfo classify(
     int valueMgDl, {
-    int lowDangerThreshold = 50,
-    int normalMinimumThreshold = 70,
-    int normalMaximumThreshold = 140,
+    int lowAlertThreshold = 70,
     int highDangerThreshold = 180,
   }) {
     final level = GlycemiaClassifier.classify(
       valueMgDl,
-      lowDangerThreshold: lowDangerThreshold,
-      normalMinimumThreshold: normalMinimumThreshold,
-      normalMaximumThreshold: normalMaximumThreshold,
+      lowAlertThreshold: lowAlertThreshold,
       highDangerThreshold: highDangerThreshold,
     );
     return switch (level) {
-      GlycemiaLevel.lowDanger || GlycemiaLevel.highDanger =>
-        const GlycemiaClassificationInfo('Perigo', corPerigo),
-      GlycemiaLevel.lowAlert => const GlycemiaClassificationInfo(
-        'Alerta Baixo',
-        corAlertaBaixo,
+      GlycemiaLevel.hypoglycemia => const GlycemiaClassificationInfo(
+        'Hipoglicemia',
+        corHipoglicemia,
       ),
-      GlycemiaLevel.highAlert => const GlycemiaClassificationInfo(
-        'Alerta Alto',
-        corAlertaAlto,
+      GlycemiaLevel.hyperglycemia => const GlycemiaClassificationInfo(
+        'Hiperglicemia',
+        corHiperglicemia,
       ),
       GlycemiaLevel.normal => const GlycemiaClassificationInfo(
         'Normal',

@@ -41,9 +41,7 @@ class LastReadingCard extends StatelessWidget {
 
     final classification = GlycemiaClassification.classify(
       record.value,
-      lowDangerThreshold: user?.lowDangerThreshold ?? 50,
-      normalMinimumThreshold: user?.normalMinimumThreshold ?? 70,
-      normalMaximumThreshold: user?.normalMaximumThreshold ?? 140,
+      lowAlertThreshold: user?.normalMinimumThreshold ?? 70,
       highDangerThreshold: user?.highDangerThreshold ?? 180,
     );
 
@@ -110,7 +108,7 @@ class LastReadingCard extends StatelessWidget {
           ),
           Text(
             'Meta: ${user?.normalMinimumThreshold ?? 70} - '
-            '${user?.normalMaximumThreshold ?? 140} mg/dL',
+            '${user?.highDangerThreshold ?? 180} mg/dL',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.9),
               fontSize: 12,

@@ -58,16 +58,11 @@ class ProfileController {
   /// Retorna `null` em caso de sucesso, ou uma mensagem de erro.
   Future<String?> updateGlycemiaTargets({
     required UserModel currentUser,
-    required int lowDangerThreshold,
-    required int normalMinimumThreshold,
-    required int normalMaximumThreshold,
+    required int lowAlertThreshold,
     required int highDangerThreshold,
   }) async {
-    if (!(lowDangerThreshold < normalMinimumThreshold &&
-        normalMinimumThreshold < normalMaximumThreshold &&
-        normalMaximumThreshold < highDangerThreshold)) {
-      return 'Os valores precisam estar em ordem crescente: Perigo Baixo < '
-          'Normal Mínimo < Normal Máximo < Perigo Alto.';
+    if (lowAlertThreshold >= highDangerThreshold) {
+      return 'O limite de hipoglicemia deve ser menor que o limite de hiperglicemia.';
     }
 
     try {
@@ -81,9 +76,9 @@ class ProfileController {
         salt: currentUser.salt,
         weight: currentUser.weight,
         height: currentUser.height,
-        lowDangerThreshold: lowDangerThreshold,
-        normalMinimumThreshold: normalMinimumThreshold,
-        normalMaximumThreshold: normalMaximumThreshold,
+        lowDangerThreshold: currentUser.lowDangerThreshold,
+        normalMinimumThreshold: lowAlertThreshold,
+        normalMaximumThreshold: currentUser.normalMaximumThreshold,
         highDangerThreshold: highDangerThreshold,
         sensitivityFactor: currentUser.sensitivityFactor,
         correctionFactor: currentUser.correctionFactor,

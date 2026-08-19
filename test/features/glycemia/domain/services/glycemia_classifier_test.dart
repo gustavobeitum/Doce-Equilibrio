@@ -2,11 +2,29 @@ import 'package:doce_equilibrio/features/glycemia/domain/services/glycemia_class
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('preserva as cinco faixas personalizadas existentes', () {
-    expect(GlycemiaClassifier.classify(49), GlycemiaLevel.lowDanger);
-    expect(GlycemiaClassifier.classify(50), GlycemiaLevel.lowAlert);
+  test('classifica nas três categorias oficiais e preserva os limites', () {
+    expect(GlycemiaClassifier.classify(69), GlycemiaLevel.hypoglycemia);
     expect(GlycemiaClassifier.classify(70), GlycemiaLevel.normal);
-    expect(GlycemiaClassifier.classify(141), GlycemiaLevel.highAlert);
-    expect(GlycemiaClassifier.classify(181), GlycemiaLevel.highDanger);
+    expect(GlycemiaClassifier.classify(180), GlycemiaLevel.normal);
+    expect(GlycemiaClassifier.classify(181), GlycemiaLevel.hyperglycemia);
+  });
+
+  test('aceita limites inferior e superior personalizados', () {
+    expect(
+      GlycemiaClassifier.classify(
+        79,
+        lowAlertThreshold: 80,
+        highDangerThreshold: 200,
+      ),
+      GlycemiaLevel.hypoglycemia,
+    );
+    expect(
+      GlycemiaClassifier.classify(
+        200,
+        lowAlertThreshold: 80,
+        highDangerThreshold: 200,
+      ),
+      GlycemiaLevel.normal,
+    );
   });
 }

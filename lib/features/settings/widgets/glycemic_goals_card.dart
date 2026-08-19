@@ -13,9 +13,8 @@ class GlycemicGoalsCard extends StatelessWidget {
     required this.onPersonalizar,
   });
 
-  static const Color _colorDanger = Color(0xFFE53935);
-  static const Color _colorLow = Color(0xFFFFB300);
-  static const Color _colorHigh = Color(0xFFFB8C00);
+  static const Color _colorHypoglycemia = Color(0xFFE53935);
+  static const Color _colorHyperglycemia = Color(0xFFFFB300);
   static const Color _colorNormal = Color(0xFF4CAF50);
 
   @override
@@ -86,24 +85,17 @@ class GlycemicGoalsCard extends StatelessWidget {
           const SizedBox(height: 20),
 
           _buildLegendItem(
+            _colorHypoglycemia,
+            'Hipoglicemia: <${user.normalMinimumThreshold} mg/dL',
+          ),
+          _buildLegendItem(
             _colorNormal,
             'Normal: ${user.normalMinimumThreshold} - '
-            '${user.normalMaximumThreshold} mg/dL',
-          ),
-          _buildLegendItem(
-            _colorLow,
-            'Alerta Baixo: ${user.lowDangerThreshold} - '
-            '${user.normalMinimumThreshold - 1} mg/dL',
-          ),
-          _buildLegendItem(
-            _colorHigh,
-            'Alerta Alto: ${user.normalMaximumThreshold + 1} - '
             '${user.highDangerThreshold} mg/dL',
           ),
           _buildLegendItem(
-            _colorDanger,
-            'Perigo: <${user.lowDangerThreshold} mg/dL ou '
-            '>${user.highDangerThreshold} mg/dL',
+            _colorHyperglycemia,
+            'Hiperglicemia: >${user.highDangerThreshold} mg/dL',
           ),
 
           const SizedBox(height: 24),
@@ -116,33 +108,19 @@ class GlycemicGoalsCard extends StatelessWidget {
               children: [
                 _buildBarSegment(
                   flex: 2,
-                  color: _colorDanger,
-                  label: '<${user.lowDangerThreshold}',
+                  color: _colorHypoglycemia,
+                  label: '<${user.normalMinimumThreshold}',
                 ),
                 _buildBarSegment(
-                  flex: 2,
-                  color: _colorLow,
-                  label:
-                      '${user.lowDangerThreshold}-'
-                      '${user.normalMinimumThreshold - 1}',
-                ),
-                _buildBarSegment(
-                  flex: 4,
+                  flex: 6,
                   color: _colorNormal,
                   label:
                       '${user.normalMinimumThreshold}-'
-                      '${user.normalMaximumThreshold}',
-                ),
-                _buildBarSegment(
-                  flex: 2,
-                  color: _colorHigh,
-                  label:
-                      '${user.normalMaximumThreshold + 1}-'
                       '${user.highDangerThreshold}',
                 ),
                 _buildBarSegment(
                   flex: 2,
-                  color: _colorDanger,
+                  color: _colorHyperglycemia,
                   label: '>${user.highDangerThreshold}',
                 ),
               ],
