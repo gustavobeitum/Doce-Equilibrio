@@ -2,7 +2,6 @@ import 'package:doce_equilibrio/features/settings/screens/edit_profile_screen.da
 import 'package:flutter/material.dart';
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
-import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/features/auth/screens/login_screen.dart';
 import 'package:doce_equilibrio/features/settings/widgets/config_header.dart';
 import 'package:doce_equilibrio/features/settings/widgets/vital_data_card.dart';
@@ -17,6 +16,7 @@ import 'package:doce_equilibrio/features/settings/widgets/edit_insulin_parameter
 import 'package:doce_equilibrio/features/reminders/screens/reminders_screen.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
+import 'package:doce_equilibrio/features/settings/widgets/edit_vital_data_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -65,190 +65,11 @@ class _ConfigScreenState extends State<SettingsScreen> {
 
   Future<void> _abrirEdicaoDadosVitais() async {
     if (_user == null) return;
-
-    final weightController = TextEditingController(
-      text: _user!.weight != null ? _user!.weight.toString() : '',
+    final atualizou = await EditVitalDataDialog.show(
+      context,
+      currentUser: _user!,
+      controller: _controller,
     );
-    final heightController = TextEditingController(
-      text: _user!.height != null ? _user!.height.toString() : '',
-    );
-    final formKey = GlobalKey<FormState>();
-    String? modalError;
-
-    final atualizou = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        bool isSaving = false;
-
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              backgroundColor: AppColors.backgroundColor,
-              title: const Text('Editar Dados Vitais'),
-              content: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: weightController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Peso (kg)',
-                        hintText: 'Ex: 70.5',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Informe o peso';
-                        }
-                        if (double.tryParse(value.replaceAll(',', '.')) ==
-                            null) {
-                          return 'Valor inválido';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: heightController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Altura (cm)',
-                        hintText: 'Ex: 175',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Informe a altura';
-                        }
-                        if (int.tryParse(value) == null) {
-                          return 'Valor inválido';
-                        }
-                        return null;
-                      },
-                    ),
-                    if (modalError != null) ...[
-                      const SizedBox(height: 16),
-                      ModalFeedbackMessage(message: modalError!),
-                    ],
-                  ],
-                ),
-              ),
-              actions: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: isSaving
-                            ? null
-                            : () => Navigator.pop(context, false),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 48),
-                          foregroundColor: Colors.grey.shade700,
-                          backgroundColor: Colors.white,
-                          side: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 1,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text(
-                          'Cancelar',
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: isSaving
-                            ? null
-                            : () async {
-                                if (formKey.currentState!.validate()) {
-                                  setStateDialog(() => isSaving = true);
-
-                                  final formattedWeight = double.parse(
-                                    weightController.text.replaceAll(',', '.'),
-                                  );
-
-                                  final formattedHeight = int.parse(
-                                    heightController.text,
-                                  );
-
-                                  try {
-                                    await _controller.updateVitalData(
-                                      currentUser: _user!,
-                                      weight: formattedWeight,
-                                      height: formattedHeight,
-                                    );
-
-                                    if (context.mounted) {
-                                      Navigator.pop(context, true);
-                                    }
-                                  } catch (_) {
-                                    if (context.mounted) {
-                                      setStateDialog(() {
-                                        isSaving = false;
-                                        modalError =
-                                            'Não foi possível salvar os dados. Tente novamente.';
-                                      });
-                                    }
-                                  }
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(0, 48),
-                          backgroundColor: AppColors.primaryColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: isSaving
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Salvar',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    weightController.dispose();
-    heightController.dispose();
 
     if (!mounted) return;
     if (atualizou == true) {
