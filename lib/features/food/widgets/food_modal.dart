@@ -30,7 +30,9 @@ class FoodModal extends StatefulWidget {
 class _AlimentoModalState extends State<FoodModal> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _servingQuantityController = TextEditingController(text: '100');
   final _carbohydratesController = TextEditingController();
+  String _servingUnit = 'g';
 
   bool _isSaving = false;
   String? _modalError;
@@ -43,7 +45,11 @@ class _AlimentoModalState extends State<FoodModal> {
     final food = widget.existingFood;
     if (food != null) {
       _nameController.text = food.name;
-      _carbohydratesController.text = _formatNumber(food.carbohydratesPer100g);
+      _servingQuantityController.text = _formatNumber(food.servingQuantity);
+      _servingUnit = food.servingUnit;
+      _carbohydratesController.text = _formatNumber(
+        food.carbohydratesPerServing,
+      );
     }
   }
 
@@ -56,6 +62,7 @@ class _AlimentoModalState extends State<FoodModal> {
   @override
   void dispose() {
     _nameController.dispose();
+    _servingQuantityController.dispose();
     _carbohydratesController.dispose();
     super.dispose();
   }
@@ -74,7 +81,11 @@ class _AlimentoModalState extends State<FoodModal> {
     final errorMessage = await controller.save(
       id: widget.existingFood?.id,
       name: _nameController.text,
-      carbohydratesPer100g: double.parse(
+      servingQuantity: double.parse(
+        _servingQuantityController.text.replaceAll(',', '.'),
+      ),
+      servingUnit: _servingUnit,
+      carbohydratesPerServing: double.parse(
         _carbohydratesController.text.replaceAll(',', '.'),
       ),
     );
@@ -203,7 +214,62 @@ class _AlimentoModalState extends State<FoodModal> {
                     const SizedBox(height: 20),
 
                     const Text(
-                      'Carboidratos por 100g',
+                      'Porção de referência',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _servingQuantityController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: _fieldDecoration(hintText: 'Ex: 100'),
+                            validator: (value) {
+                              final number = double.tryParse(
+                                (value ?? '').replaceAll(',', '.'),
+                              );
+                              if (number == null || number <= 0) {
+                                return 'Porção inválida.';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            initialValue: _servingUnit,
+                            decoration: _fieldDecoration(),
+                            items: const [
+                              DropdownMenuItem(value: 'g', child: Text('g')),
+                              DropdownMenuItem(value: 'ml', child: Text('ml')),
+                              DropdownMenuItem(
+                                value: 'unidade',
+                                child: Text('un'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _servingUnit = value);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      'Carboidratos na porção',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

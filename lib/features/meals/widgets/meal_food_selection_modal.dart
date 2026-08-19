@@ -73,10 +73,21 @@ class _SelecionarAlimentoModalState extends State<MealFoodSelectionModal> {
   }
 
   Future<void> _select(FoodModel food) async {
+    if (food.carbohydratesPerServing == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Este alimento não possui carboidratos cadastrados. Atualize-o na biblioteca.',
+          ),
+        ),
+      );
+    }
+
     final quantity = await MealItemQuantityDialog.show(
       context,
       foodName: food.name,
-      initialQuantity: 100,
+      initialQuantity: food.servingQuantity,
+      unit: food.servingUnit,
     );
 
     if (quantity == null || !mounted) return;
@@ -86,8 +97,10 @@ class _SelecionarAlimentoModalState extends State<MealFoodSelectionModal> {
       MealItemModel(
         foodId: food.id!,
         foodName: food.name,
-        carbohydratesPer100g: food.carbohydratesPer100g,
-        quantityGrams: quantity,
+        servingQuantity: food.servingQuantity,
+        servingUnit: food.servingUnit,
+        carbohydratesPerServing: food.carbohydratesPerServing,
+        consumedQuantity: quantity,
       ),
     );
   }
@@ -226,7 +239,8 @@ class _SelecionarAlimentoModalState extends State<MealFoodSelectionModal> {
                                   ),
                                 ),
                                 subtitle: Text(
-                                  '${food.carbohydratesPer100g}g de carboidratos / 100g',
+                                  '${food.carbohydratesPerServing}g de carboidratos / '
+                                  '${food.servingQuantity} ${food.servingUnit}',
                                 ),
                                 trailing: const Icon(
                                   PhosphorIcons.plusCircle,

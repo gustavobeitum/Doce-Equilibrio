@@ -27,7 +27,12 @@ void main() {
 
   test('cria e edita alimento', () async {
     expect(
-      await controller.save(name: 'Arroz', carbohydratesPer100g: 28),
+      await controller.save(
+        name: 'Arroz',
+        servingQuantity: 100,
+        servingUnit: 'g',
+        carbohydratesPerServing: 28,
+      ),
       isNull,
     );
     expect(repository.created?.name, 'Arroz');
@@ -36,11 +41,15 @@ void main() {
       await controller.save(
         id: 4,
         name: 'Arroz integral',
-        carbohydratesPer100g: 25,
+        servingQuantity: 50,
+        servingUnit: 'g',
+        carbohydratesPerServing: 12.5,
       ),
       isNull,
     );
     expect(repository.updated?.id, 4);
+    expect(repository.updated?.servingQuantity, 50);
+    expect(repository.updated?.carbohydratesPerServing, 12.5);
   });
 
   test('exclui alimento', () async {
@@ -49,8 +58,14 @@ void main() {
   });
 }
 
-FoodModel _food({required int id, required String name}) =>
-    FoodModel(id: id, userId: 1, name: name, carbohydratesPer100g: 28);
+FoodModel _food({required int id, required String name}) => FoodModel(
+  id: id,
+  userId: 1,
+  name: name,
+  servingQuantity: 100,
+  servingUnit: 'g',
+  carbohydratesPerServing: 28,
+);
 
 class _FakeFoodRepository implements FoodRepositoryInterface {
   List<FoodModel> foods = [];

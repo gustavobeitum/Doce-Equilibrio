@@ -25,10 +25,21 @@ class FoodController {
   Future<String?> save({
     int? id,
     required String name,
-    required double carbohydratesPer100g,
+    required double servingQuantity,
+    required String servingUnit,
+    required double carbohydratesPerServing,
   }) async {
     if (name.trim().isEmpty) {
       return 'Informe o nome do alimento.';
+    }
+    if (servingQuantity <= 0) {
+      return 'Informe uma porção válida.';
+    }
+    if (servingUnit.trim().isEmpty) {
+      return 'Informe a unidade da porção.';
+    }
+    if (carbohydratesPerServing < 0) {
+      return 'Informe uma quantidade válida de carboidratos.';
     }
 
     try {
@@ -41,7 +52,9 @@ class FoodController {
         id: id,
         userId: userId,
         name: name.trim(),
-        carbohydratesPer100g: carbohydratesPer100g,
+        servingQuantity: servingQuantity,
+        servingUnit: servingUnit,
+        carbohydratesPerServing: carbohydratesPerServing,
       );
 
       if (id == null) {

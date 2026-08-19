@@ -144,6 +144,7 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
       context,
       foodName: item.foodName,
       initialQuantity: item.quantityGrams,
+      unit: item.servingUnit,
     );
     if (quantity == null || !mounted) return;
     setState(() {
@@ -459,7 +460,7 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '${_formatNumber(item.quantityGrams)}g • '
+                                          '${_formatNumber(item.quantityGrams)} ${item.servingUnit} • '
                                           '${_formatNumber(item.carbohydrates)}g carboidratos',
                                           style: TextStyle(
                                             fontSize: 12,

@@ -66,7 +66,8 @@ class FoodCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_formatNumber(food.carbohydratesPer100g)}g de carboidratos / 100g',
+                  '${_formatNumber(food.carbohydratesPerServing)}g de carboidratos / '
+                  '${_formatNumber(food.servingQuantity)} ${food.servingUnit}',
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],

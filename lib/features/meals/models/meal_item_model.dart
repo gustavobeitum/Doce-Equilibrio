@@ -9,24 +9,39 @@ class MealItemModel {
   final int? mealId;
   final int foodId;
   final String foodName;
-  final double carbohydratesPer100g;
-  final double quantityGrams;
+  final double servingQuantity;
+  final String servingUnit;
+  final double carbohydratesPerServing;
+  final double consumedQuantity;
 
   const MealItemModel({
     this.id,
     this.mealId,
     required this.foodId,
     required this.foodName,
-    required this.carbohydratesPer100g,
-    required this.quantityGrams,
-  });
+    double? servingQuantity,
+    this.servingUnit = 'g',
+    double? carbohydratesPerServing,
+    double? consumedQuantity,
+    double? carbohydratesPer100g,
+    double? quantityGrams,
+  }) : servingQuantity = servingQuantity ?? 100,
+       carbohydratesPerServing =
+           carbohydratesPerServing ?? carbohydratesPer100g ?? 0,
+       consumedQuantity = consumedQuantity ?? quantityGrams ?? 0;
+
+  double get quantityGrams => consumedQuantity;
+
+  double get carbohydratesPer100g => servingUnit == 'g' && servingQuantity > 0
+      ? (carbohydratesPerServing / servingQuantity) * 100
+      : carbohydratesPerServing;
 
   /// Carboidratos deste item (RF-006 / UC-13): regra de três simples a
   /// partir do valor por 100g e da quantidade usada na refeição.
   double get carbohydrates => CarbohydrateCalculator.forItem(
-    carbohydratesPerServing: carbohydratesPer100g,
-    standardServing: 100,
-    consumedQuantity: quantityGrams,
+    carbohydratesPerServing: carbohydratesPerServing,
+    standardServing: servingQuantity,
+    consumedQuantity: consumedQuantity,
   );
 
   Map<String, dynamic> toMap() {
@@ -36,7 +51,11 @@ class MealItemModel {
       'alimentoId': foodId,
       'nomeAlimento': foodName,
       'carboidratosPor100g': carbohydratesPer100g,
-      'quantidadeGramas': quantityGrams,
+      'quantidadeGramas': consumedQuantity,
+      'porcaoQuantidade': servingQuantity,
+      'porcaoUnidade': servingUnit,
+      'carboidratosPorPorcao': carbohydratesPerServing,
+      'quantidadeConsumida': consumedQuantity,
     };
   }
 
@@ -46,8 +65,14 @@ class MealItemModel {
       mealId: map['refeicaoId'],
       foodId: map['alimentoId'],
       foodName: map['nomeAlimento'],
-      carbohydratesPer100g: (map['carboidratosPor100g'] as num).toDouble(),
-      quantityGrams: (map['quantidadeGramas'] as num).toDouble(),
+      servingQuantity: (map['porcaoQuantidade'] as num?)?.toDouble() ?? 100,
+      servingUnit: map['porcaoUnidade'] as String? ?? 'g',
+      carbohydratesPerServing:
+          (map['carboidratosPorPorcao'] as num?)?.toDouble() ??
+          (map['carboidratosPor100g'] as num).toDouble(),
+      consumedQuantity:
+          (map['quantidadeConsumida'] as num?)?.toDouble() ??
+          (map['quantidadeGramas'] as num).toDouble(),
     );
   }
 
@@ -62,8 +87,10 @@ class MealItemModel {
       mealId: clearPersistenceIds ? null : mealId ?? this.mealId,
       foodId: foodId,
       foodName: foodName,
-      carbohydratesPer100g: carbohydratesPer100g,
-      quantityGrams: quantityGrams ?? this.quantityGrams,
+      servingQuantity: servingQuantity,
+      servingUnit: servingUnit,
+      carbohydratesPerServing: carbohydratesPerServing,
+      consumedQuantity: quantityGrams ?? consumedQuantity,
     );
   }
 }

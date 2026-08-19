@@ -6,6 +6,7 @@ abstract final class MealItemQuantityDialog {
     BuildContext context, {
     required String foodName,
     required double initialQuantity,
+    String unit = 'g',
   }) {
     var quantityText = initialQuantity == initialQuantity.roundToDouble()
         ? initialQuantity.toInt().toString()
@@ -26,7 +27,7 @@ abstract final class MealItemQuantityDialog {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               labelText: 'Quantidade',
-              suffixText: 'g',
+              suffixText: unit == 'unidade' ? 'un' : unit,
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(

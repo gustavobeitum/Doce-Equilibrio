@@ -4,14 +4,24 @@ class FoodModel {
   final int? id;
   final int userId;
   final String name;
-  final double carbohydratesPer100g;
+  final double servingQuantity;
+  final String servingUnit;
+  final double carbohydratesPerServing;
 
   const FoodModel({
     this.id,
     required this.userId,
     required this.name,
-    required this.carbohydratesPer100g,
-  });
+    this.servingQuantity = 100,
+    this.servingUnit = 'g',
+    double? carbohydratesPerServing,
+    double? carbohydratesPer100g,
+  }) : carbohydratesPerServing =
+           carbohydratesPerServing ?? carbohydratesPer100g ?? 0;
+
+  double get carbohydratesPer100g => servingUnit == 'g' && servingQuantity > 0
+      ? (carbohydratesPerServing / servingQuantity) * 100
+      : carbohydratesPerServing;
 
   Map<String, dynamic> toMap() {
     return {
@@ -19,6 +29,9 @@ class FoodModel {
       'usuarioId': userId,
       'nome': name,
       'carboidratosPor100g': carbohydratesPer100g,
+      'porcaoQuantidade': servingQuantity,
+      'porcaoUnidade': servingUnit,
+      'carboidratosPorPorcao': carbohydratesPerServing,
     };
   }
 
@@ -27,7 +40,11 @@ class FoodModel {
       id: map['id'],
       userId: map['usuarioId'],
       name: map['nome'],
-      carbohydratesPer100g: (map['carboidratosPor100g'] as num).toDouble(),
+      servingQuantity: (map['porcaoQuantidade'] as num?)?.toDouble() ?? 100,
+      servingUnit: map['porcaoUnidade'] as String? ?? 'g',
+      carbohydratesPerServing:
+          (map['carboidratosPorPorcao'] as num?)?.toDouble() ??
+          (map['carboidratosPor100g'] as num).toDouble(),
     );
   }
 }

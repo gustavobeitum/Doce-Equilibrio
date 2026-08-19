@@ -63,7 +63,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('favorite-meal-7')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('100g'), findsOneWidget);
+    expect(find.textContaining('100 g'), findsOneWidget);
     expect(find.text('28.0g'), findsOneWidget);
 
     final saveButton = find.byKey(const ValueKey('save-meal-button'));

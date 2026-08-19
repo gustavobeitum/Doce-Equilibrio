@@ -1,4 +1,5 @@
 import 'package:doce_equilibrio/features/meals/domain/services/carbohydrate_calculator.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -21,5 +22,18 @@ void main() {
       ),
       0,
     );
+  });
+
+  test('usa a porção configurada no snapshot do alimento', () {
+    const item = MealItemModel(
+      foodId: 1,
+      foodName: 'Iogurte',
+      servingQuantity: 170,
+      servingUnit: 'g',
+      carbohydratesPerServing: 14,
+      consumedQuantity: 85,
+    );
+
+    expect(item.carbohydrates, 7);
   });
 }
