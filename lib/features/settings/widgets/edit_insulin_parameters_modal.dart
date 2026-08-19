@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
+import 'package:doce_equilibrio/core/utils/validators.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
@@ -303,16 +304,7 @@ class _EditarParametrosModalState extends State<EditInsulinParametersModal> {
                         fontWeight: FontWeight.w600,
                       ),
                       decoration: _fieldDecoration(sufixo: 'mg/dL'),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Informe um valor.';
-                        }
-                        final numero = int.tryParse(value);
-                        if (numero == null || numero <= 0 || numero > 999) {
-                          return 'Informe um valor entre 1 e 999.';
-                        }
-                        return null;
-                      },
+                      validator: Validators.validateGlycemiaTarget,
                     ),
                     const SizedBox(height: 28),
 

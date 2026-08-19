@@ -54,6 +54,39 @@ void main() {
 
     expect(sessionService.currentUserId, isNull);
   });
+
+  test(
+    'controllers distintos leem parâmetros da única fonte persistida',
+    () async {
+      sessionService.currentUserId = 7;
+      repository.user = _user(id: 7);
+      final settingsController = ProfileController(repository, sessionService);
+      final insulinParametersController = ProfileController(
+        repository,
+        sessionService,
+      );
+
+      await settingsController.updateInsulinParameters(
+        currentUser: repository.user!,
+        sensitivityFactor: 12,
+        correctionFactor: 35,
+        glycemiaTarget: 105,
+      );
+      final readByInsulin = await insulinParametersController.loadCurrentUser();
+      expect(readByInsulin?.sensitivityFactor, 12);
+
+      await insulinParametersController.updateInsulinParameters(
+        currentUser: readByInsulin!,
+        sensitivityFactor: 14,
+        correctionFactor: 40,
+        glycemiaTarget: 110,
+      );
+      final readBySettings = await settingsController.loadCurrentUser();
+      expect(readBySettings?.sensitivityFactor, 14);
+      expect(readBySettings?.correctionFactor, 40);
+      expect(readBySettings?.glycemiaTarget, 110);
+    },
+  );
 }
 
 UserModel _user({required int id}) {
@@ -110,6 +143,7 @@ class _FakeUserRepository implements UserRepositoryInterface {
   @override
   Future<int> update(UserModel user) async {
     updatedUser = user;
+    this.user = user;
     return 1;
   }
 }

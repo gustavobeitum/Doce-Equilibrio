@@ -21,6 +21,9 @@ import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.
 import 'package:doce_equilibrio/features/meals/repositories/meal_repository_interface.dart';
 import 'package:doce_equilibrio/features/meals/repositories/meal_repository.dart';
 import 'package:doce_equilibrio/features/home/controllers/home_controller.dart';
+import 'package:doce_equilibrio/features/insulin/controllers/insulin_application_controller.dart';
+import 'package:doce_equilibrio/features/insulin/repositories/insulin_application_repository.dart';
+import 'package:doce_equilibrio/features/insulin/repositories/insulin_application_repository_interface.dart';
 import 'package:doce_equilibrio/features/medication/controllers/medication_controller.dart';
 import 'package:doce_equilibrio/features/medication/repositories/medication_repository_interface.dart';
 import 'package:doce_equilibrio/features/medication/repositories/medication_repository.dart';
@@ -71,6 +74,10 @@ void setupServiceLocator() {
     () => ActivityRepository(getIt<DatabaseConnection>()),
   );
 
+  getIt.registerLazySingleton<InsulinApplicationRepositoryInterface>(
+    () => InsulinApplicationRepository(getIt<DatabaseConnection>()),
+  );
+
   getIt.registerLazySingleton<NotificationScheduler>(
     () => LocalNotificationScheduler(),
   );
@@ -91,10 +98,7 @@ void setupServiceLocator() {
     ),
   );
   getIt.registerFactory<RegistrationController>(
-    () => RegistrationController(
-      getIt<UserRepositoryInterface>(),
-      getIt<SessionService>(),
-    ),
+    () => RegistrationController(getIt<UserRepositoryInterface>()),
   );
   getIt.registerFactory<HomeController>(
     () => HomeController(
@@ -138,6 +142,14 @@ void setupServiceLocator() {
       getIt<FoodRepositoryInterface>(),
       getIt<SessionService>(),
       getIt<FoodLibraryNavigator>(),
+    ),
+  );
+  getIt.registerFactory<InsulinApplicationController>(
+    () => InsulinApplicationController(
+      getIt<InsulinApplicationRepositoryInterface>(),
+      getIt<MealRepositoryInterface>(),
+      getIt<UserRepositoryInterface>(),
+      getIt<SessionService>(),
     ),
   );
   getIt.registerFactory<MedicationController>(

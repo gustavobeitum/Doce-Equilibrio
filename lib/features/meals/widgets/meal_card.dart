@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
+import 'package:doce_equilibrio/features/meals/widgets/meal_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
@@ -19,14 +20,6 @@ class MealCard extends StatelessWidget {
     this.onUsarFavorita,
   });
 
-  String _formatDate(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final time = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    return '$day/$month às $time:$minute';
-  }
-
   String _formatNumber(double value) {
     return value == value.roundToDouble()
         ? value.toInt().toString()
@@ -35,7 +28,7 @@ class MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nomesItens = meal.items.map((item) => item.foodName).join(', ');
+    final nomesItens = MealSummary.foodNames(meal);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -82,7 +75,11 @@ class MealCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _formatDate(meal.dateTime),
+                      '${meal.dateTime.day.toString().padLeft(2, '0')}/'
+                      '${meal.dateTime.month.toString().padLeft(2, '0')}/'
+                      '${meal.dateTime.year} • '
+                      '${meal.dateTime.hour.toString().padLeft(2, '0')}:'
+                      '${meal.dateTime.minute.toString().padLeft(2, '0')}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -108,13 +105,12 @@ class MealCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          if (nomesItens.isNotEmpty)
-            Text(
-              nomesItens,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
-            ),
+          Text(
+            nomesItens,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13, color: Colors.black87),
+          ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

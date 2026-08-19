@@ -24,7 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final telas = [
       HomeScreen(onNavegarParaInsulina: _irParaAbaInsulina),
-      const InsulinCalculatorScreen(),
+      InsulinCalculatorScreen(isActive: _currentIndex == 1),
       const MealsScreen(),
       const ActivityScreen(),
     ];

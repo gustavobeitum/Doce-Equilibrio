@@ -11,7 +11,7 @@ class DatabaseConnection {
 
   static Database? _database;
 
-  static const int _databaseVersion = 10;
+  static const int _databaseVersion = 12;
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -114,6 +114,9 @@ class DatabaseConnection {
         usuarioId INTEGER NOT NULL,
         nome TEXT NOT NULL,
         carboidratosPor100g REAL NOT NULL,
+        porcaoQuantidade REAL NOT NULL DEFAULT 100,
+        porcaoUnidade TEXT NOT NULL DEFAULT 'g',
+        carboidratosPorPorcao REAL NOT NULL,
         FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
       )
     ''');
@@ -141,6 +144,10 @@ class DatabaseConnection {
         nomeAlimento TEXT NOT NULL,
         carboidratosPor100g REAL NOT NULL,
         quantidadeGramas REAL NOT NULL,
+        porcaoQuantidade REAL NOT NULL DEFAULT 100,
+        porcaoUnidade TEXT NOT NULL DEFAULT 'g',
+        carboidratosPorPorcao REAL NOT NULL,
+        quantidadeConsumida REAL NOT NULL,
         FOREIGN KEY (refeicaoId) REFERENCES Refeicao (id) ON DELETE CASCADE,
         FOREIGN KEY (alimentoId) REFERENCES Alimento (id)
       )
@@ -148,6 +155,8 @@ class DatabaseConnection {
     await db.execute(
       'CREATE INDEX idx_refeicaoitem_refeicao ON RefeicaoItem (refeicaoId)',
     );
+
+    await _createInsulinApplicationTable(db);
 
     await db.execute('''
       CREATE TABLE Atividade (
@@ -235,6 +244,8 @@ class DatabaseConnection {
       );
 
       await _createFeatureTables(txn);
+      await _migrateFoodServings(txn);
+      await _createInsulinApplicationTable(txn);
     });
   }
 
@@ -278,6 +289,9 @@ class DatabaseConnection {
         usuarioId INTEGER NOT NULL,
         nome TEXT NOT NULL,
         carboidratosPor100g REAL NOT NULL,
+        porcaoQuantidade REAL NOT NULL DEFAULT 100,
+        porcaoUnidade TEXT NOT NULL DEFAULT 'g',
+        carboidratosPorPorcao REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
       )
     ''');
@@ -306,6 +320,10 @@ class DatabaseConnection {
         nomeAlimento TEXT NOT NULL,
         carboidratosPor100g REAL NOT NULL,
         quantidadeGramas REAL NOT NULL,
+        porcaoQuantidade REAL NOT NULL DEFAULT 100,
+        porcaoUnidade TEXT NOT NULL DEFAULT 'g',
+        carboidratosPorPorcao REAL NOT NULL DEFAULT 0,
+        quantidadeConsumida REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (refeicaoId) REFERENCES Refeicao (id) ON DELETE CASCADE,
         FOREIGN KEY (alimentoId) REFERENCES Alimento (id)
       )
@@ -343,6 +361,95 @@ class DatabaseConnection {
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_medicamento_user_data '
       'ON Medicamento (usuarioId, dataHora)',
+    );
+  }
+
+  Future<void> _migrateFoodServings(DatabaseExecutor db) async {
+    await _addColumnIfMissing(
+      db,
+      'Alimento',
+      'porcaoQuantidade',
+      'REAL NOT NULL DEFAULT 100',
+    );
+    await _addColumnIfMissing(
+      db,
+      'Alimento',
+      'porcaoUnidade',
+      "TEXT NOT NULL DEFAULT 'g'",
+    );
+    await _addColumnIfMissing(
+      db,
+      'Alimento',
+      'carboidratosPorPorcao',
+      'REAL NOT NULL DEFAULT 0',
+    );
+    await db.execute('''
+      UPDATE Alimento
+      SET carboidratosPorPorcao = carboidratosPor100g
+      WHERE porcaoQuantidade = 100
+        AND porcaoUnidade = 'g'
+        AND carboidratosPorPorcao = 0
+    ''');
+
+    await _addColumnIfMissing(
+      db,
+      'RefeicaoItem',
+      'porcaoQuantidade',
+      'REAL NOT NULL DEFAULT 100',
+    );
+    await _addColumnIfMissing(
+      db,
+      'RefeicaoItem',
+      'porcaoUnidade',
+      "TEXT NOT NULL DEFAULT 'g'",
+    );
+    await _addColumnIfMissing(
+      db,
+      'RefeicaoItem',
+      'carboidratosPorPorcao',
+      'REAL NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      'RefeicaoItem',
+      'quantidadeConsumida',
+      'REAL NOT NULL DEFAULT 0',
+    );
+    await db.execute('''
+      UPDATE RefeicaoItem
+      SET carboidratosPorPorcao = carboidratosPor100g,
+          quantidadeConsumida = quantidadeGramas
+      WHERE porcaoQuantidade = 100
+        AND porcaoUnidade = 'g'
+        AND carboidratosPorPorcao = 0
+    ''');
+  }
+
+  Future<void> _createInsulinApplicationTable(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS AplicacaoInsulina (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuarioId INTEGER NOT NULL,
+        glicemia INTEGER NOT NULL,
+        carboidratos REAL NOT NULL,
+        doseAlimentar REAL NOT NULL,
+        doseCorrecao REAL NOT NULL,
+        doseRecomendada REAL NOT NULL,
+        doseAplicada REAL NOT NULL,
+        dataHora TEXT NOT NULL,
+        observacao TEXT,
+        refeicaoId INTEGER,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE,
+        FOREIGN KEY (refeicaoId) REFERENCES Refeicao (id) ON DELETE SET NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_aplicacao_insulina_user_data '
+      'ON AplicacaoInsulina (usuarioId, dataHora)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_aplicacao_insulina_refeicao '
+      'ON AplicacaoInsulina (refeicaoId)',
     );
   }
 

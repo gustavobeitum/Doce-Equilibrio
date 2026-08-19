@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/core/utils/formatters.dart';
+import 'package:doce_equilibrio/core/utils/validators.dart';
 import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controller.dart';
 import 'package:doce_equilibrio/features/glycemia/models/glycemia_record_model.dart';
 import 'package:doce_equilibrio/features/glycemia/models/glycemia_period.dart';
@@ -241,19 +242,7 @@ class _RegistroGlicemiaModalState extends State<GlycemiaRecordModal> {
                         color: Color(0xFF4A4A4A),
                       ),
                       decoration: _fieldDecoration(hintText: '120'),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Informe o valor da glicemia.';
-                        }
-                        final parsedValue = int.tryParse(value);
-                        if (parsedValue == null) {
-                          return 'Informe apenas números.';
-                        }
-                        if (parsedValue <= 0 || parsedValue > 999) {
-                          return 'Informe um valor entre 1 e 999 mg/dL.';
-                        }
-                        return null;
-                      },
+                      validator: Validators.validateGlycemia,
                     ),
                     const SizedBox(height: 20),
 
