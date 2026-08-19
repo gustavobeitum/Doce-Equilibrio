@@ -9,7 +9,9 @@ import 'package:doce_equilibrio/features/auth/controllers/login_controller.dart'
 import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final bool registrationCompleted;
+
+  const LoginScreen({super.key, this.registrationCompleted = false});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -28,6 +30,16 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _controller = getIt<LoginController>();
+    if (widget.registrationCompleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cadastro realizado com sucesso. Faça login.'),
+          ),
+        );
+      });
+    }
   }
 
   @override

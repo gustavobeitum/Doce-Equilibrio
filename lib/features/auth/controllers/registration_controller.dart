@@ -1,5 +1,4 @@
 import 'package:doce_equilibrio/core/errors/auth_exceptions.dart';
-import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/core/utils/encryption_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
@@ -7,9 +6,8 @@ import 'package:doce_equilibrio/features/auth/repositories/user_repository_inter
 
 class RegistrationController {
   final UserRepositoryInterface _userRepository;
-  final SessionService _sessionService;
 
-  RegistrationController(this._userRepository, this._sessionService);
+  RegistrationController(this._userRepository);
 
   /// Cadastra um novo usuário, gerando um salt aleatório único para ele e
   /// armazenando apenas o hash da senha (nunca a senha em texto puro).
@@ -48,7 +46,6 @@ class RegistrationController {
       final id = await _userRepository.create(user);
 
       if (id > 0) {
-        await _sessionService.startSession(id);
         return null;
       }
 

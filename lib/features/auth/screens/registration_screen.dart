@@ -1,6 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/utils/validators.dart';
-import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
+import 'package:doce_equilibrio/features/auth/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
@@ -73,7 +73,10 @@ class _CadastroScreenState extends State<RegistrationScreen> {
       if (errorMessage == null && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const MainScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                const LoginScreen(registrationCompleted: true),
+          ),
           (Route<dynamic> route) => false,
         );
       } else if (mounted) {
