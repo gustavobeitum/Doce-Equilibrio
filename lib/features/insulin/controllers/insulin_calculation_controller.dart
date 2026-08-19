@@ -31,12 +31,9 @@ class InsulinCalculationController {
     );
 
     return InsulinCalculationResult(
-      correctionDose: _round(calculation.correctionDose),
-      carbohydrateDose: _round(calculation.carbohydrateDose),
-      totalDose: _round(calculation.totalDose),
+      correctionDose: calculation.correctionDose,
+      carbohydrateDose: calculation.carbohydrateDose,
+      totalDose: calculation.totalDose,
     );
   }
-
-  /// Arredonda para 1 casa decimal (precisão comum em canetas de insulina).
-  static double _round(double value) => (value * 10).round() / 10;
 }
