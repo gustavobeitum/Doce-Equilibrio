@@ -19,6 +19,15 @@ class GlycemiaController {
     return repository.listByUser(userId);
   }
 
+  Future<List<GlycemiaRecordModel>> listHistoryByPeriod(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final userId = await _sessionService.getCurrentUserId();
+    if (userId == null) return [];
+    return repository.listByPeriod(userId, start, end);
+  }
+
   /// Busca a última leitura do usuário logado, para exibir na Home.
   Future<GlycemiaRecordModel?> findLatestReading() async {
     final userId = await _sessionService.getCurrentUserId();

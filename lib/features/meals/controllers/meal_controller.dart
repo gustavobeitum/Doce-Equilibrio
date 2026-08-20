@@ -18,6 +18,12 @@ class MealController {
     return repository.listByUser(userId);
   }
 
+  Future<List<MealModel>> listByPeriod(DateTime start, DateTime end) async {
+    final userId = await _sessionService.getCurrentUserId();
+    if (userId == null) return [];
+    return repository.listByPeriod(userId, start, end);
+  }
+
   /// Refeições marcadas como favoritas (UC-14), pra reaproveitar depois.
   Future<List<MealModel>> listFavorites() async {
     final meals = await list();

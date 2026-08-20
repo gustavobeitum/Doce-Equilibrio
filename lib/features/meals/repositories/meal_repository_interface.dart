@@ -6,4 +6,9 @@ abstract class MealRepositoryInterface {
   Future<int> setFavorite(int id, bool favorite);
   Future<int> delete(int id);
   Future<List<MealModel>> listByUser(int userId);
+  Future<List<MealModel>> listByPeriod(
+    int userId,
+    DateTime start,
+    DateTime end,
+  );
 }

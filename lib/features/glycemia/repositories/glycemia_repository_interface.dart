@@ -7,6 +7,11 @@ abstract class GlycemiaRepositoryInterface {
 
   /// Lista os registros do usuário, do mais recente para o mais antigo.
   Future<List<GlycemiaRecordModel>> listByUser(int userId);
+  Future<List<GlycemiaRecordModel>> listByPeriod(
+    int userId,
+    DateTime start,
+    DateTime end,
+  );
 
   /// Busca a leitura mais recente do usuário, ou `null` se ele ainda não
   /// tiver nenhum registro.

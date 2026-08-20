@@ -10,7 +10,7 @@ import 'package:doce_equilibrio/features/settings/widgets/parameters_card.dart';
 import 'package:doce_equilibrio/features/settings/widgets/alarms_card.dart';
 import 'package:doce_equilibrio/features/settings/widgets/register_glycemia_card.dart';
 import 'package:doce_equilibrio/features/settings/widgets/logout_card.dart';
-import 'package:doce_equilibrio/features/glycemia/screens/glycemia_history_screen.dart';
+import 'package:doce_equilibrio/features/history/screens/history_screen.dart';
 import 'package:doce_equilibrio/features/settings/widgets/customize_glycemia_targets_modal.dart';
 import 'package:doce_equilibrio/features/settings/widgets/edit_insulin_parameters_modal.dart';
 import 'package:doce_equilibrio/features/reminders/screens/reminders_screen.dart';
@@ -88,7 +88,7 @@ class _ConfigScreenState extends State<SettingsScreen> {
   void _abrirHistoricoGlicemia() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const GlycemiaHistoryScreen()),
+      MaterialPageRoute(builder: (context) => const HistoryScreen()),
     );
   }
 

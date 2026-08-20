@@ -69,11 +69,32 @@ class MealRepository implements MealRepositoryInterface {
 
   @override
   Future<List<MealModel>> listByUser(int userId) async {
+    return _list(userId);
+  }
+
+  @override
+  Future<List<MealModel>> listByPeriod(
+    int userId,
+    DateTime start,
+    DateTime end,
+  ) {
+    return _list(userId, start: start, end: end);
+  }
+
+  Future<List<MealModel>> _list(
+    int userId, {
+    DateTime? start,
+    DateTime? end,
+  }) async {
     final db = await _dbConnection.database;
     final mapasRefeicoes = await db.query(
       'Refeicao',
-      where: 'usuarioId = ?',
-      whereArgs: [userId],
+      where: start == null
+          ? 'usuarioId = ?'
+          : 'usuarioId = ? AND dataHora >= ? AND dataHora <= ?',
+      whereArgs: start == null
+          ? [userId]
+          : [userId, start.toIso8601String(), end!.toIso8601String()],
       orderBy: 'dataHora DESC',
     );
 

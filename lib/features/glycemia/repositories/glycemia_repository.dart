@@ -43,6 +43,22 @@ class GlycemiaRepository implements GlycemiaRepositoryInterface {
   }
 
   @override
+  Future<List<GlycemiaRecordModel>> listByPeriod(
+    int userId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    final db = await _dbConnection.database;
+    final maps = await db.query(
+      'Glicemia',
+      where: 'usuarioId = ? AND dataHora >= ? AND dataHora <= ?',
+      whereArgs: [userId, start.toIso8601String(), end.toIso8601String()],
+      orderBy: 'dataHora DESC',
+    );
+    return maps.map(GlycemiaRecordModel.fromMap).toList();
+  }
+
+  @override
   Future<GlycemiaRecordModel?> findLatestReading(int userId) async {
     final db = await _dbConnection.database;
     final maps = await db.query(

@@ -68,6 +68,15 @@ class InsulinApplicationController extends ChangeNotifier {
     applications = await repository.listByUser(userId);
   }
 
+  Future<List<InsulinApplicationModel>> listByPeriod(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final userId = await _sessionService.getCurrentUserId();
+    if (userId == null) return const [];
+    return repository.listByPeriod(userId, start, end);
+  }
+
   Future<void> loadMeals({int? userId}) async {
     isLoadingMeals = true;
     mealsErrorMessage = null;
