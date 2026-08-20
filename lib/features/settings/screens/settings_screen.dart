@@ -17,6 +17,8 @@ import 'package:doce_equilibrio/features/reminders/screens/reminders_screen.dart
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 import 'package:doce_equilibrio/features/settings/widgets/edit_vital_data_dialog.dart';
+import 'package:doce_equilibrio/features/settings/widgets/medications_card.dart';
+import 'package:doce_equilibrio/features/medication/screens/medications_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -82,6 +84,13 @@ class _ConfigScreenState extends State<SettingsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const RemindersScreen()),
+    );
+  }
+
+  void _abrirMedicamentos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const MedicationsScreen()),
     );
   }
 
@@ -245,6 +254,8 @@ class _ConfigScreenState extends State<SettingsScreen> {
                             ),
                             SizedBox(height: 16),
                             AlarmsCard(onTap: _abrirLembretes),
+                            SizedBox(height: 16),
+                            MedicationsCard(onTap: _abrirMedicamentos),
                             SizedBox(height: 16),
                             RegisterGlycemiaCard(
                               onTap: _abrirHistoricoGlicemia,
