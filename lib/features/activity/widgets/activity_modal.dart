@@ -4,6 +4,7 @@ import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/features/activity/controllers/activity_controller.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_model.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_type.dart';
+import 'package:doce_equilibrio/features/activity/models/activity_intensity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -35,6 +36,7 @@ class _AtividadeModalState extends State<ActivityModal> {
   final _observacaoController = TextEditingController();
 
   ActivityType _tipoSelecionado = ActivityType.caminhada;
+  ActivityIntensity? _intensidadeSelecionada;
   late DateTime _data;
   late TimeOfDay _hora;
   bool _isSaving = false;
@@ -49,6 +51,7 @@ class _AtividadeModalState extends State<ActivityModal> {
 
     if (atividade != null) {
       _tipoSelecionado = atividade.tipo;
+      _intensidadeSelecionada = atividade.intensidade;
       _duracaoController.text = atividade.duracaoMinutos.toString();
       _observacaoController.text = atividade.observacao ?? '';
       _data = atividade.dataHora;
@@ -113,6 +116,7 @@ class _AtividadeModalState extends State<ActivityModal> {
       tipo: _tipoSelecionado,
       duracaoMinutos: int.parse(_duracaoController.text),
       dataHora: dataHora,
+      intensidade: _intensidadeSelecionada!,
       observacao: _observacaoController.text,
     );
 
@@ -281,6 +285,34 @@ class _AtividadeModalState extends State<ActivityModal> {
                     ),
                     const SizedBox(height: 20),
 
+                    const Text(
+                      'Intensidade',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<ActivityIntensity>(
+                      initialValue: _intensidadeSelecionada,
+                      decoration: _fieldDecoration(
+                        hintText: 'Selecione a intensidade',
+                      ),
+                      items: ActivityIntensity.values.map((intensity) {
+                        return DropdownMenuItem<ActivityIntensity>(
+                          value: intensity,
+                          child: Text(intensity.label),
+                        );
+                      }).toList(),
+                      onChanged: (intensity) {
+                        setState(() => _intensidadeSelecionada = intensity);
+                      },
+                      validator: (intensity) =>
+                          intensity == null ? 'Selecione a intensidade.' : null,
+                    ),
+                    const SizedBox(height: 20),
+
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -369,8 +401,7 @@ class _AtividadeModalState extends State<ActivityModal> {
                       controller: _observacaoController,
                       maxLines: 3,
                       decoration: _fieldDecoration(
-                        hintText:
-                            'Ex: intensidade, percurso, como se sentiu...',
+                        hintText: 'Ex: percurso, como se sentiu...',
                       ),
                     ),
                     const SizedBox(height: 28),

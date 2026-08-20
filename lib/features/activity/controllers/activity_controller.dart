@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_model.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_type.dart';
+import 'package:doce_equilibrio/features/activity/models/activity_intensity.dart';
 import 'package:doce_equilibrio/features/activity/repositories/activity_repository_interface.dart';
 import 'package:flutter/foundation.dart';
 
@@ -21,6 +22,7 @@ class ActivityController {
     required ActivityType tipo,
     required int duracaoMinutos,
     required DateTime dataHora,
+    required ActivityIntensity intensidade,
     String? observacao,
   }) async {
     if (duracaoMinutos <= 0) {
@@ -41,6 +43,7 @@ class ActivityController {
         tipo: tipo,
         duracaoMinutos: duracaoMinutos,
         dataHora: dataHora,
+        intensidade: intensidade,
         observacao: (observacaoTratada == null || observacaoTratada.isEmpty)
             ? null
             : observacaoTratada,

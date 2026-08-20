@@ -1,4 +1,5 @@
 import 'package:doce_equilibrio/features/activity/models/activity_type.dart';
+import 'package:doce_equilibrio/features/activity/models/activity_intensity.dart';
 
 class ActivityModel {
   final int? id;
@@ -6,6 +7,7 @@ class ActivityModel {
   final ActivityType tipo;
   final int duracaoMinutos;
   final DateTime dataHora;
+  final ActivityIntensity? intensidade;
   final String? observacao;
 
   const ActivityModel({
@@ -14,6 +16,7 @@ class ActivityModel {
     required this.tipo,
     required this.duracaoMinutos,
     required this.dataHora,
+    this.intensidade,
     this.observacao,
   });
 
@@ -24,6 +27,7 @@ class ActivityModel {
       'tipo': tipo.name,
       'duracaoMinutos': duracaoMinutos,
       'dataHora': dataHora.toIso8601String(),
+      'intensidade': intensidade?.label,
       'observacao': observacao,
     };
   }
@@ -35,6 +39,7 @@ class ActivityModel {
       tipo: ActivityType.fromValor(map['tipo']),
       duracaoMinutos: map['duracaoMinutos'],
       dataHora: DateTime.parse(map['dataHora']),
+      intensidade: ActivityIntensity.fromValue(map['intensidade'] as String?),
       observacao: map['observacao'],
     );
   }

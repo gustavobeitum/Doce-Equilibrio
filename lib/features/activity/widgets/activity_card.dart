@@ -94,6 +94,12 @@ class ActivityCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
+                  'Intensidade: '
+                  '${atividade.intensidade?.label ?? 'Não informada'}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 4),
+                Text(
                   _formatDate(atividade.dataHora),
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
