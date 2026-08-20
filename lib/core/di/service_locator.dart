@@ -33,6 +33,9 @@ import 'package:doce_equilibrio/features/reminders/controllers/reminder_controll
 import 'package:doce_equilibrio/features/reminders/repositories/reminder_repository_interface.dart';
 import 'package:doce_equilibrio/features/reminders/repositories/reminder_repository.dart';
 import 'package:doce_equilibrio/features/reminders/services/reminder_notification_service.dart';
+import 'package:doce_equilibrio/features/reports/controllers/report_controller.dart';
+import 'package:doce_equilibrio/features/reports/services/report_pdf_service.dart';
+import 'package:doce_equilibrio/features/reports/services/report_share_service.dart';
 import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 import 'package:get_it/get_it.dart';
 
@@ -91,6 +94,10 @@ void setupServiceLocator() {
   );
   getIt.registerLazySingleton<ReminderNotificationService>(
     () => getIt<NotificationService>(),
+  );
+  getIt.registerLazySingleton<ReportPdfService>(() => const ReportPdfService());
+  getIt.registerLazySingleton<ReportShareService>(
+    () => NativeReportShareService(),
   );
 
   getIt.registerFactory<LoginController>(
@@ -173,6 +180,16 @@ void setupServiceLocator() {
     () => ActivityController(
       getIt<ActivityRepositoryInterface>(),
       getIt<SessionService>(),
+    ),
+  );
+  getIt.registerFactory<ReportController>(
+    () => ReportController(
+      getIt<GlycemiaController>(),
+      getIt<InsulinApplicationController>(),
+      getIt<MealController>(),
+      getIt<ProfileController>(),
+      getIt<ReportPdfService>(),
+      getIt<ReportShareService>(),
     ),
   );
 }

@@ -15,6 +15,7 @@ import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart'
 import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
 import 'package:doce_equilibrio/features/meals/screens/meals_screen.dart';
 import 'package:doce_equilibrio/features/meals/widgets/meal_summary.dart';
+import 'package:doce_equilibrio/features/reports/screens/report_screen.dart';
 import 'package:doce_equilibrio/features/settings/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -185,6 +186,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ],
+        ),
+        const Spacer(),
+        IconButton(
+          tooltip: 'Gerar relatório',
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(builder: (_) => const ReportScreen()),
+          ),
+          icon: const Icon(PhosphorIcons.filePdf, color: Colors.white),
         ),
       ],
     ),
