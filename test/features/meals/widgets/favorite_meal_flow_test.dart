@@ -172,6 +172,20 @@ class _FakeMealRepository implements MealRepositoryInterface {
   Future<List<MealModel>> listByUser(int userId) async => meals;
 
   @override
+  Future<List<MealModel>> listByPeriod(
+    int userId,
+    DateTime start,
+    DateTime end,
+  ) async => meals
+      .where(
+        (meal) =>
+            meal.userId == userId &&
+            !meal.dateTime.isBefore(start) &&
+            !meal.dateTime.isAfter(end),
+      )
+      .toList();
+
+  @override
   Future<int> setFavorite(int id, bool favorite) async => 1;
 
   @override

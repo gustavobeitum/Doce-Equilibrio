@@ -103,6 +103,30 @@ void main() {
     expect(await controller.delete(3), isTrue);
     expect(repository.deletedId, 3);
   });
+
+  test('lista período usando usuário atual e limites inclusivos', () async {
+    repository.meals = [
+      MealModel(
+        id: 1,
+        userId: 1,
+        type: MealType.almoco,
+        dateTime: DateTime(2026, 8, 1),
+      ),
+      MealModel(
+        id: 2,
+        userId: 2,
+        type: MealType.jantar,
+        dateTime: DateTime(2026, 8, 1),
+      ),
+    ];
+
+    final result = await controller.listByPeriod(
+      DateTime(2026, 8, 1),
+      DateTime(2026, 8, 1, 23, 59, 59, 999, 999),
+    );
+
+    expect(result.map((meal) => meal.id), [1]);
+  });
 }
 
 MealItemModel _item({required double quantity}) => MealItemModel(
@@ -148,6 +172,20 @@ class _FakeMealRepository implements MealRepositoryInterface {
 
   @override
   Future<List<MealModel>> listByUser(int userId) async => meals;
+
+  @override
+  Future<List<MealModel>> listByPeriod(
+    int userId,
+    DateTime start,
+    DateTime end,
+  ) async => meals
+      .where(
+        (meal) =>
+            meal.userId == userId &&
+            !meal.dateTime.isBefore(start) &&
+            !meal.dateTime.isAfter(end),
+      )
+      .toList();
 
   @override
   Future<int> setFavorite(int id, bool favorite) async {

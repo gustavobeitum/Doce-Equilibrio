@@ -270,6 +270,15 @@ void main() {
     expect(meals.lastUserId, 1);
     expect(controller.meals.every((meal) => meal.userId == 1), isTrue);
   });
+
+  test('lista aplicações do usuário atual por período', () async {
+    final start = DateTime(2026, 8, 1);
+    final end = DateTime(2026, 8, 31, 23, 59, 59, 999, 999);
+
+    await controller.listByPeriod(start, end);
+
+    expect(applications.periodQuery, (userId: 1, start: start, end: end));
+  });
 }
 
 InsulinApplicationModel _application({
@@ -296,6 +305,7 @@ class _ApplicationRepository implements InsulinApplicationRepositoryInterface {
   ({int id, int userId})? deleted;
   bool throwOnList = false;
   bool throwOnCreate = false;
+  ({int userId, DateTime start, DateTime end})? periodQuery;
 
   @override
   Future<int> create(InsulinApplicationModel application) async {
@@ -327,7 +337,17 @@ class _ApplicationRepository implements InsulinApplicationRepositoryInterface {
     int userId,
     DateTime start,
     DateTime end,
-  ) async => items;
+  ) async {
+    periodQuery = (userId: userId, start: start, end: end);
+    return items
+        .where(
+          (item) =>
+              item.userId == userId &&
+              !item.dateTime.isBefore(start) &&
+              !item.dateTime.isAfter(end),
+        )
+        .toList();
+  }
 
   @override
   Future<List<InsulinApplicationModel>> listByUser(int userId) async {
@@ -362,6 +382,17 @@ class _MealRepository implements MealRepositoryInterface {
     if (throwOnList) throw Exception('database');
     return items.where((meal) => meal.userId == userId).toList();
   }
+
+  @override
+  Future<List<MealModel>> listByPeriod(
+    int userId,
+    DateTime start,
+    DateTime end,
+  ) async => (await listByUser(userId))
+      .where(
+        (meal) => !meal.dateTime.isBefore(start) && !meal.dateTime.isAfter(end),
+      )
+      .toList();
 
   @override
   Future<int> create(MealModel meal) => throw UnimplementedError();
