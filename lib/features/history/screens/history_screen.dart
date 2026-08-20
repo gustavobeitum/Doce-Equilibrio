@@ -3,6 +3,7 @@ import 'package:doce_equilibrio/core/history/history_period.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/utils/formatters.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
+import 'package:doce_equilibrio/features/charts/screens/charts_screen.dart';
 import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controller.dart';
 import 'package:doce_equilibrio/features/glycemia/models/glycemia_record_model.dart';
 import 'package:doce_equilibrio/features/glycemia/screens/glycemia_history_screen.dart';
@@ -290,10 +291,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               )
               .toList(),
-    OutlinedButton.icon(
-      onPressed: () => _openManagement(const GlycemiaHistoryScreen()),
-      icon: const Icon(PhosphorIcons.pencilSimple),
-      label: const Text('Gerenciar glicemias'),
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () => _openManagement(const ChartsScreen()),
+          icon: const Icon(PhosphorIcons.chartLine),
+          label: const Text('Visualizar gráficos'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => _openManagement(const GlycemiaHistoryScreen()),
+          icon: const Icon(PhosphorIcons.pencilSimple),
+          label: const Text('Gerenciar glicemias'),
+        ),
+      ],
     ),
   );
 

@@ -3,6 +3,7 @@ import 'package:doce_equilibrio/features/auth/controllers/registration_controlle
 import 'package:doce_equilibrio/features/auth/controllers/login_controller.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository.dart';
+import 'package:doce_equilibrio/features/charts/controllers/charts_controller.dart';
 import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controller.dart';
 import 'package:doce_equilibrio/features/glycemia/repositories/glycemia_repository.dart';
 import 'package:doce_equilibrio/features/glycemia/repositories/glycemia_repository_interface.dart';
@@ -110,6 +111,12 @@ void setupServiceLocator() {
     () => GlycemiaController(
       getIt<GlycemiaRepositoryInterface>(),
       getIt<SessionService>(),
+    ),
+  );
+  getIt.registerFactory<ChartsController>(
+    () => ChartsController(
+      getIt<GlycemiaController>(),
+      getIt<ProfileController>(),
     ),
   );
   getIt.registerFactory<ProfileController>(
