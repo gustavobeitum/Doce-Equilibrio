@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:doce_equilibrio/core/database/migrations/insulin_application_migration.dart';
 
 class DatabaseConnection {
   static final DatabaseConnection _instance = DatabaseConnection._internal();
@@ -156,7 +157,7 @@ class DatabaseConnection {
       'CREATE INDEX idx_refeicaoitem_refeicao ON RefeicaoItem (refeicaoId)',
     );
 
-    await _createInsulinApplicationTable(db);
+    await InsulinApplicationMigration.create(db);
 
     await db.execute('''
       CREATE TABLE Atividade (
@@ -245,7 +246,11 @@ class DatabaseConnection {
 
       await _createFeatureTables(txn);
       await _migrateFoodServings(txn);
-      await _createInsulinApplicationTable(txn);
+      await InsulinApplicationMigration.migrate(
+        txn,
+        oldVersion: oldVersion,
+        newVersion: newVersion,
+      );
     });
   }
 
@@ -423,34 +428,6 @@ class DatabaseConnection {
         AND porcaoUnidade = 'g'
         AND carboidratosPorPorcao = 0
     ''');
-  }
-
-  Future<void> _createInsulinApplicationTable(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS AplicacaoInsulina (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        usuarioId INTEGER NOT NULL,
-        glicemia INTEGER NOT NULL,
-        carboidratos REAL NOT NULL,
-        doseAlimentar REAL NOT NULL,
-        doseCorrecao REAL NOT NULL,
-        doseRecomendada REAL NOT NULL,
-        doseAplicada REAL NOT NULL,
-        dataHora TEXT NOT NULL,
-        observacao TEXT,
-        refeicaoId INTEGER,
-        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE,
-        FOREIGN KEY (refeicaoId) REFERENCES Refeicao (id) ON DELETE SET NULL
-      )
-    ''');
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_aplicacao_insulina_user_data '
-      'ON AplicacaoInsulina (usuarioId, dataHora)',
-    );
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_aplicacao_insulina_refeicao '
-      'ON AplicacaoInsulina (refeicaoId)',
-    );
   }
 
   Future<void> _addColumnIfMissing(
