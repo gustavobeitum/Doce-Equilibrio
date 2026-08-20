@@ -133,6 +133,50 @@ void main() {
       appliedDose: '3',
     );
     expect(applications.created!.mealId, 7);
+    expect(applications.created!.carbohydrates, 42);
+  });
+
+  test('carboidratos manuais não criam vínculo com refeição', () async {
+    await controller.save(
+      glycemia: '120',
+      carbohydrates: '35,5',
+      appliedDose: '2,5',
+    );
+
+    expect(applications.created!.carbohydrates, 35.5);
+    expect(applications.created!.mealId, isNull);
+  });
+
+  test('alteração manual de carboidratos invalida cálculo e refeição', () {
+    controller.selectMeal(meals.items.single);
+    controller.calculate(glycemia: '120', carbohydrates: '42');
+
+    controller.clearMealSelection();
+
+    expect(controller.selectedMeal, isNull);
+    expect(controller.calculation, isNull);
+  });
+
+  test('alteração de glicemia invalida recomendação anterior', () {
+    controller.calculate(glycemia: '120', carbohydrates: '42');
+
+    controller.invalidateCalculation();
+
+    expect(controller.calculation, isNull);
+  });
+
+  test('rejeita dose aplicada negativa e fora de incrementos de 0,5', () async {
+    for (final dose in ['-0,5', '1,2']) {
+      expect(
+        await controller.save(
+          glycemia: '120',
+          carbohydrates: '20',
+          appliedDose: dose,
+        ),
+        isFalse,
+      );
+    }
+    expect(applications.created, isNull);
   });
 
   test(
@@ -162,6 +206,28 @@ void main() {
     expect(applications.deleted, (id: 9, userId: 1));
   });
 
+  test('listagem mantém somente aplicações do usuário atual', () async {
+    applications.items = [_application(id: 1), _application(id: 2, userId: 2)];
+
+    await controller.load();
+
+    expect(controller.applications.map((item) => item.id), [1]);
+  });
+
+  test('trata erro do repository ao salvar aplicação', () async {
+    applications.throwOnCreate = true;
+
+    final saved = await controller.save(
+      glycemia: '120',
+      carbohydrates: '20',
+      appliedDose: '1,5',
+    );
+
+    expect(saved, isFalse);
+    expect(controller.isSaving, isFalse);
+    expect(controller.errorMessage, contains('Não foi possível salvar'));
+  });
+
   test('informa ausência de sessão sem consultar repositories', () async {
     final noSession = InsulinApplicationController(
       applications,
@@ -172,7 +238,7 @@ void main() {
 
     await noSession.load();
 
-    expect(noSession.errorMessage, contains('Sessão expirada'));
+    expect(noSession.loadErrorMessage, contains('Sessão expirada'));
     expect(noSession.user, isNull);
   });
 
@@ -182,7 +248,7 @@ void main() {
     await controller.load();
 
     expect(controller.isLoading, isFalse);
-    expect(controller.errorMessage, contains('Não foi possível carregar'));
+    expect(controller.loadErrorMessage, contains('Não foi possível carregar'));
   });
 
   test(
@@ -208,11 +274,12 @@ void main() {
 
 InsulinApplicationModel _application({
   int? id,
+  int userId = 1,
   double recommended = 3,
   double applied = 3,
 }) => InsulinApplicationModel(
   id: id,
-  userId: 1,
+  userId: userId,
   glycemia: 120,
   carbohydrates: 30,
   carbohydrateDose: 2,
@@ -228,9 +295,11 @@ class _ApplicationRepository implements InsulinApplicationRepositoryInterface {
   InsulinApplicationModel? updated;
   ({int id, int userId})? deleted;
   bool throwOnList = false;
+  bool throwOnCreate = false;
 
   @override
   Future<int> create(InsulinApplicationModel application) async {
+    if (throwOnCreate) throw Exception('database');
     created = application;
     items = [...items, application];
     return 1;
@@ -263,7 +332,7 @@ class _ApplicationRepository implements InsulinApplicationRepositoryInterface {
   @override
   Future<List<InsulinApplicationModel>> listByUser(int userId) async {
     if (throwOnList) throw Exception('database');
-    return items;
+    return items.where((item) => item.userId == userId).toList();
   }
 }
 

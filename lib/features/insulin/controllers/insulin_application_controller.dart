@@ -30,6 +30,7 @@ class InsulinApplicationController extends ChangeNotifier {
   String? mealsErrorMessage;
   bool isSaving = false;
   String? errorMessage;
+  String? loadErrorMessage;
   String? successMessage;
   UserModel? user;
   List<MealModel> meals = const [];
@@ -41,21 +42,22 @@ class InsulinApplicationController extends ChangeNotifier {
   Future<void> load() async {
     isLoading = true;
     errorMessage = null;
+    loadErrorMessage = null;
     notifyListeners();
     try {
       final userId = await _sessionService.getCurrentUserId();
       if (userId == null) {
-        errorMessage = 'Sessão expirada. Faça login novamente.';
+        loadErrorMessage = 'Sessão expirada. Faça login novamente.';
         return;
       }
       user = await _userRepository.find(userId);
       if (user == null) {
-        errorMessage = 'Não foi possível carregar o usuário.';
+        loadErrorMessage = 'Não foi possível carregar o usuário.';
         return;
       }
       await Future.wait([loadMeals(userId: userId), _loadApplications(userId)]);
     } catch (_) {
-      errorMessage = 'Não foi possível carregar as aplicações de insulina.';
+      loadErrorMessage = 'Não foi possível carregar as aplicações de insulina.';
     } finally {
       isLoading = false;
       notifyListeners();

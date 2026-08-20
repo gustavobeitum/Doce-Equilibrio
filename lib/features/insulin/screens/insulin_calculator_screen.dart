@@ -246,6 +246,32 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
                           color: AppColors.primaryColor,
                         ),
                       )
+                    : _controller.loadErrorMessage != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                PhosphorIcons.warningCircle,
+                                color: AppColors.dangerColor,
+                                size: 48,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                _controller.loadErrorMessage!,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _controller.load,
+                                child: const Text('Tentar novamente'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                     : RefreshIndicator(
                         onRefresh: _controller.load,
                         child: ListView(
@@ -456,7 +482,10 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
         ..._controller.applications.map(
           (item) => Card(
             child: ListTile(
-              title: Text('${_format(item.appliedDose)} UI aplicada'),
+              title: Text(
+                '${_formatDateTime(item.dateTime)}\n'
+                '${_format(item.appliedDose)} UI aplicada',
+              ),
               subtitle: Text(
                 'Recomendada: ${_format(item.recommendedDose)} UI • ${item.glycemia} mg/dL • ${_format(item.carbohydrates)} g',
               ),
@@ -479,6 +508,14 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
         ),
     ],
   );
+
+  String _formatDateTime(DateTime value) {
+    final day = value.day.toString().padLeft(2, '0');
+    final month = value.month.toString().padLeft(2, '0');
+    final hour = value.hour.toString().padLeft(2, '0');
+    final minute = value.minute.toString().padLeft(2, '0');
+    return '$day/$month/${value.year} • $hour:$minute';
+  }
 
   Widget _medicalWarning() => Container(
     padding: const EdgeInsets.all(16),
