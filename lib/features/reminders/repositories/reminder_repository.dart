@@ -44,11 +44,15 @@ class ReminderRepository implements ReminderRepositoryInterface {
   @override
   Future<List<ReminderModel>> listByUser(int userId) async {
     final db = await _dbConnection.database;
-    final maps = await db.query(
-      'Lembrete',
-      where: 'usuarioId = ?',
-      whereArgs: [userId],
-      orderBy: 'hora ASC, minuto ASC',
+    final maps = await db.rawQuery(
+      '''
+      SELECT Lembrete.*, Medicamento.nome AS medicamentoNome
+      FROM Lembrete
+      LEFT JOIN Medicamento ON Medicamento.id = Lembrete.medicamentoId
+      WHERE Lembrete.usuarioId = ?
+      ORDER BY Lembrete.hora ASC, Lembrete.minuto ASC
+      ''',
+      [userId],
     );
     return maps.map((map) => ReminderModel.fromMap(map)).toList();
   }

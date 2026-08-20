@@ -122,6 +122,15 @@ class ReminderCard extends StatelessWidget {
                           color: Colors.grey.shade600,
                         ),
                       ),
+                      if (reminder.medicationName != null)
+                        Text(
+                          'Medicamento: ${reminder.medicationName}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                     ],
                   ),
                 ),

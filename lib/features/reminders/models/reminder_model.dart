@@ -20,6 +20,8 @@ class ReminderModel {
   final List<int> weekdays;
   final DateTime? date;
   final bool active;
+  final int? medicationId;
+  final String? medicationName;
 
   const ReminderModel({
     this.id,
@@ -32,6 +34,8 @@ class ReminderModel {
     this.weekdays = const [],
     this.date,
     this.active = true,
+    this.medicationId,
+    this.medicationName,
   });
 
   Map<String, dynamic> toMap() {
@@ -46,6 +50,7 @@ class ReminderModel {
       'diasSemana': weekdays.join(','),
       'data': date?.toIso8601String(),
       'ativo': active ? 1 : 0,
+      'medicamentoId': medicationId,
     };
   }
 
@@ -65,6 +70,8 @@ class ReminderModel {
           .toList(),
       date: map['data'] != null ? DateTime.parse(map['data']) : null,
       active: (map['ativo'] as int) == 1,
+      medicationId: map['medicamentoId'] as int?,
+      medicationName: map['medicamentoNome'] as String?,
     );
   }
 
@@ -80,6 +87,9 @@ class ReminderModel {
     List<int>? weekdays,
     DateTime? date,
     bool? active,
+    int? medicationId,
+    bool clearMedication = false,
+    String? medicationName,
   }) {
     return ReminderModel(
       id: id ?? this.id,
@@ -92,6 +102,10 @@ class ReminderModel {
       weekdays: weekdays ?? this.weekdays,
       date: date ?? this.date,
       active: active ?? this.active,
+      medicationId: clearMedication ? null : medicationId ?? this.medicationId,
+      medicationName: clearMedication
+          ? null
+          : medicationName ?? this.medicationName,
     );
   }
 }

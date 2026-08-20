@@ -38,6 +38,7 @@ class ReminderController {
     List<int> weekdays = const [],
     DateTime? date,
     bool active = true,
+    int? medicationId,
   }) async {
     if (title.trim().isEmpty) {
       return 'Informe um título para o lembrete.';
@@ -84,6 +85,7 @@ class ReminderController {
         weekdays: diasOrdenados,
         date: repeat ? null : date,
         active: active,
+        medicationId: type == ReminderType.medication ? medicationId : null,
       );
 
       final savedId = id == null

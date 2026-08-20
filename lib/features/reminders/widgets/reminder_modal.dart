@@ -4,6 +4,8 @@ import 'package:doce_equilibrio/core/widgets/modal_feedback_message.dart';
 import 'package:doce_equilibrio/features/reminders/controllers/reminder_controller.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_model.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_type.dart';
+import 'package:doce_equilibrio/features/medication/controllers/medication_controller.dart';
+import 'package:doce_equilibrio/features/medication/models/medication_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -22,8 +24,9 @@ const List<({String label, int weekday})> _displayWeekdays = [
 
 class ReminderModal extends StatefulWidget {
   final ReminderModel? existingReminder;
+  final Future<List<MedicationModel>> Function()? loadMedications;
 
-  const ReminderModal({super.key, this.existingReminder});
+  const ReminderModal({super.key, this.existingReminder, this.loadMedications});
 
   /// Abre o modal. Retorna `true` se o lembrete foi criado/atualizado.
   static Future<bool?> exibir(
@@ -54,6 +57,9 @@ class _LembreteModalState extends State<ReminderModal> {
   bool _isSaving = false;
   String? _modalError;
   bool _tituloEditadoManualmente = false;
+  List<MedicationModel> _medications = const [];
+  int? _selectedMedicationId;
+  bool _loadingMedications = false;
 
   bool get _isEditing => widget.existingReminder != null;
 
@@ -64,6 +70,7 @@ class _LembreteModalState extends State<ReminderModal> {
 
     if (reminder != null) {
       _selectedType = reminder.type;
+      _selectedMedicationId = reminder.medicationId;
       _tituloController.text = reminder.title;
       _tituloEditadoManualmente = true;
       _time = TimeOfDay(hour: reminder.time, minute: reminder.minute);
@@ -75,6 +82,21 @@ class _LembreteModalState extends State<ReminderModal> {
       _date = DateTime.now();
       _tituloController.text = _selectedType.label;
     }
+    if (_selectedType == ReminderType.medication) {
+      _loadMedications();
+    }
+  }
+
+  Future<void> _loadMedications() async {
+    setState(() => _loadingMedications = true);
+    final loader =
+        widget.loadMedications ?? getIt<MedicationController>().listar;
+    final medications = await loader();
+    if (!mounted) return;
+    setState(() {
+      _medications = medications;
+      _loadingMedications = false;
+    });
   }
 
   @override
@@ -185,6 +207,9 @@ class _LembreteModalState extends State<ReminderModal> {
       weekdays: _repeat ? _selectedDays.toList() : const [],
       date: _repeat ? null : _date,
       active: widget.existingReminder?.active ?? true,
+      medicationId: _selectedType == ReminderType.medication
+          ? _selectedMedicationId
+          : null,
     );
 
     if (!mounted) return;
@@ -309,15 +334,76 @@ class _LembreteModalState extends State<ReminderModal> {
                         if (type == null) return;
                         setState(() {
                           _selectedType = type;
+                          if (type != ReminderType.medication) {
+                            _selectedMedicationId = null;
+                          }
                           // Só sobrescreve o título automaticamente se o
                           // usuário ainda não digitou nada próprio.
                           if (!_tituloEditadoManualmente) {
                             _tituloController.text = type.label;
                           }
                         });
+                        if (type == ReminderType.medication &&
+                            _medications.isEmpty) {
+                          _loadMedications();
+                        }
                       },
                     ),
                     const SizedBox(height: 20),
+
+                    if (_selectedType == ReminderType.medication) ...[
+                      const Text(
+                        'Medicamento (opcional)',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (_loadingMedications)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else
+                        DropdownButtonFormField<int?>(
+                          key: const Key('reminder-medication-dropdown'),
+                          initialValue:
+                              _medications.any(
+                                (item) => item.id == _selectedMedicationId,
+                              )
+                              ? _selectedMedicationId
+                              : null,
+                          decoration: _fieldDecoration(
+                            hintText: _medications.isEmpty
+                                ? 'Nenhum medicamento cadastrado'
+                                : 'Sem medicamento associado',
+                          ),
+                          items: [
+                            const DropdownMenuItem<int?>(
+                              value: null,
+                              child: Text('Sem medicamento associado'),
+                            ),
+                            ..._medications
+                                .where((item) => item.id != null)
+                                .map(
+                                  (item) => DropdownMenuItem<int?>(
+                                    value: item.id,
+                                    child: Text(
+                                      '${item.nome} • ${item.dosagem}',
+                                    ),
+                                  ),
+                                ),
+                          ],
+                          onChanged: (id) {
+                            setState(() => _selectedMedicationId = id);
+                          },
+                        ),
+                      const SizedBox(height: 20),
+                    ],
 
                     const Text(
                       'Título',
