@@ -4,6 +4,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:doce_equilibrio/core/database/migrations/insulin_application_migration.dart';
+import 'package:doce_equilibrio/core/database/migrations/final_features_migration.dart';
 
 class DatabaseConnection {
   static final DatabaseConnection _instance = DatabaseConnection._internal();
@@ -12,7 +13,7 @@ class DatabaseConnection {
 
   static Database? _database;
 
-  static const int _databaseVersion = 12;
+  static const int _databaseVersion = 13;
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -104,10 +105,15 @@ class DatabaseConnection {
         diasSemana TEXT NOT NULL,
         data TEXT,
         ativo INTEGER NOT NULL DEFAULT 1,
-        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+        medicamentoId INTEGER,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE,
+        FOREIGN KEY (medicamentoId) REFERENCES Medicamento (id) ON DELETE SET NULL
       )
     ''');
     await db.execute('CREATE INDEX idx_lembrete_user ON Lembrete (usuarioId)');
+    await db.execute(
+      'CREATE INDEX idx_lembrete_medicamento ON Lembrete (medicamentoId)',
+    );
 
     await db.execute('''
       CREATE TABLE Alimento (
@@ -166,6 +172,7 @@ class DatabaseConnection {
         tipo TEXT NOT NULL,
         duracaoMinutos INTEGER NOT NULL,
         dataHora TEXT NOT NULL,
+        intensidade TEXT,
         observacao TEXT,
         FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
       )
@@ -251,6 +258,11 @@ class DatabaseConnection {
         oldVersion: oldVersion,
         newVersion: newVersion,
       );
+      await FinalFeaturesMigration.migrate(
+        txn,
+        oldVersion: oldVersion,
+        newVersion: newVersion,
+      );
     });
   }
 
@@ -282,7 +294,9 @@ class DatabaseConnection {
         diasSemana TEXT NOT NULL,
         data TEXT,
         ativo INTEGER NOT NULL DEFAULT 1,
-        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
+        medicamentoId INTEGER,
+        FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE,
+        FOREIGN KEY (medicamentoId) REFERENCES Medicamento (id) ON DELETE SET NULL
       )
     ''');
     await db.execute(
@@ -344,6 +358,7 @@ class DatabaseConnection {
         tipo TEXT NOT NULL,
         duracaoMinutos INTEGER NOT NULL,
         dataHora TEXT NOT NULL,
+        intensidade TEXT,
         observacao TEXT,
         FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE CASCADE
       )
