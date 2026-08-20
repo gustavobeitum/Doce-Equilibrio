@@ -47,15 +47,6 @@ class _SplashVerificacaoState extends State<AuthenticationSplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Doce Equilíbrio',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 24),
             CircularProgressIndicator(color: Colors.white),
           ],
         ),
