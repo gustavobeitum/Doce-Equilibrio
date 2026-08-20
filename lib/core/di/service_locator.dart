@@ -22,6 +22,7 @@ import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.
 import 'package:doce_equilibrio/features/meals/repositories/meal_repository_interface.dart';
 import 'package:doce_equilibrio/features/meals/repositories/meal_repository.dart';
 import 'package:doce_equilibrio/features/home/controllers/home_controller.dart';
+import 'package:doce_equilibrio/features/hba1c/controllers/hba1c_controller.dart';
 import 'package:doce_equilibrio/features/insulin/controllers/insulin_application_controller.dart';
 import 'package:doce_equilibrio/features/insulin/repositories/insulin_application_repository.dart';
 import 'package:doce_equilibrio/features/insulin/repositories/insulin_application_repository_interface.dart';
@@ -118,6 +119,9 @@ void setupServiceLocator() {
       getIt<GlycemiaController>(),
       getIt<ProfileController>(),
     ),
+  );
+  getIt.registerFactory<HbA1cController>(
+    () => HbA1cController(getIt<GlycemiaController>()),
   );
   getIt.registerFactory<ProfileController>(
     () => ProfileController(

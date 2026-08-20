@@ -4,6 +4,7 @@ import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/charts/controllers/charts_controller.dart';
 import 'package:doce_equilibrio/features/charts/domain/glycemia_chart_data.dart';
 import 'package:doce_equilibrio/features/glycemia/domain/services/glycemia_classifier.dart';
+import 'package:doce_equilibrio/features/hba1c/controllers/hba1c_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -17,18 +18,23 @@ class ChartsScreen extends StatefulWidget {
 
 class _ChartsScreenState extends State<ChartsScreen> {
   late final ChartsController _controller;
+  late final HbA1cController _hba1cController;
 
   @override
   void initState() {
     super.initState();
     _controller = getIt<ChartsController>()..addListener(_refresh);
+    _hba1cController = getIt<HbA1cController>()..addListener(_refresh);
     _controller.load();
+    _hba1cController.load();
   }
 
   @override
   void dispose() {
     _controller.removeListener(_refresh);
+    _hba1cController.removeListener(_refresh);
     _controller.dispose();
+    _hba1cController.dispose();
     super.dispose();
   }
 
@@ -76,6 +82,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
               child: Column(
                 children: [
                   _periodSelector(),
+                  _hba1cSection(),
                   Expanded(child: _content()),
                 ],
               ),
@@ -196,7 +203,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
       );
     }
     return RefreshIndicator(
-      onRefresh: _controller.load,
+      onRefresh: _refreshAll,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
@@ -208,6 +215,93 @@ class _ChartsScreenState extends State<ChartsScreen> {
             _distributionChart(data),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _refreshAll() async {
+    await Future.wait([_controller.load(), _hba1cController.load()]);
+  }
+
+  Widget _hba1cSection() {
+    Widget content;
+    if (_hba1cController.isLoading) {
+      content = const SizedBox(
+        height: 56,
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primaryColor),
+        ),
+      );
+    } else if (_hba1cController.errorMessage != null) {
+      content = Row(
+        children: [
+          const Icon(PhosphorIcons.warningCircle, color: AppColors.dangerColor),
+          const SizedBox(width: 10),
+          Expanded(child: Text(_hba1cController.errorMessage!)),
+          IconButton(
+            tooltip: 'Tentar novamente',
+            onPressed: _hba1cController.load,
+            icon: const Icon(PhosphorIcons.arrowClockwise),
+          ),
+        ],
+      );
+    } else if (_hba1cController.estimate == null) {
+      content = const Text(
+        'Nenhum registro nos últimos 90 dias para estimar a HbA1c.',
+      );
+    } else {
+      final estimate = _hba1cController.estimate!;
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${estimate.percentage.toStringAsFixed(1).replaceAll('.', ',')}%',
+            style: const TextStyle(
+              color: AppColors.primaryColor,
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Média glicêmica: ${estimate.averageGlycemiaMgDl.toStringAsFixed(1).replaceAll('.', ',')} mg/dL',
+          ),
+          Text(
+            'Últimos 90 dias • ${estimate.recordCount} ${estimate.recordCount == 1 ? 'registro' : 'registros'}',
+            style: TextStyle(color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Estimativa baseada nos registros disponíveis no aplicativo. Não substitui exame laboratorial.',
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+          ),
+        ],
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(PhosphorIcons.testTube, color: AppColors.primaryColor),
+                  SizedBox(width: 8),
+                  Text(
+                    'HbA1c estimada',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              content,
+            ],
+          ),
+        ),
       ),
     );
   }
