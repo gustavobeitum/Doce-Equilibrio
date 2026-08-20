@@ -38,6 +38,37 @@ void main() {
     expect(notifications.scheduled?.id, 3);
     expect(notifications.cancelled, isNull);
   });
+
+  test('salva associação opcional com medicamento', () async {
+    final error = await controller.save(
+      type: ReminderType.medication,
+      title: 'Dose da manhã',
+      time: 8,
+      minute: 0,
+      repeat: true,
+      weekdays: const [1],
+      medicationId: 9,
+    );
+
+    expect(error, isNull);
+    expect(repository.created?.medicationId, 9);
+    expect(notifications.scheduled?.medicationId, 9);
+  });
+
+  test('remove associação ao trocar o tipo do lembrete', () async {
+    final error = await controller.save(
+      type: ReminderType.outro,
+      title: 'Consulta',
+      time: 9,
+      minute: 0,
+      repeat: true,
+      weekdays: const [2],
+      medicationId: 9,
+    );
+
+    expect(error, isNull);
+    expect(repository.created?.medicationId, isNull);
+  });
 }
 
 ReminderModel _reminder({required bool active}) {
@@ -86,9 +117,13 @@ class _FakeNotificationService implements ReminderNotificationService {
 
 class _FakeReminderRepository implements ReminderRepositoryInterface {
   ReminderModel? updated;
+  ReminderModel? created;
 
   @override
-  Future<int> create(ReminderModel reminder) async => 1;
+  Future<int> create(ReminderModel reminder) async {
+    created = reminder;
+    return 1;
+  }
 
   @override
   Future<int> completeSingle(int id) async => 1;
