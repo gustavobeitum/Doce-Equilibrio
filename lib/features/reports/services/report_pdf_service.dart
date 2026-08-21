@@ -5,6 +5,26 @@ import 'package:doce_equilibrio/features/reports/models/report_data.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+/// Paleta de cores do PDF, espelhando exatamente `AppColors`
+/// (`lib/core/theme/app_colors.dart`) em vez das cores genéricas prontas
+/// do pacote `pdf` (como `PdfColors.teal700`), para o relatório ficar com
+/// a mesma identidade visual do restante do app.
+class _PdfBrandColors {
+  _PdfBrandColors._();
+
+  // Corresponde a AppColors.primaryColor (0xFF009688).
+  static final primary = PdfColor.fromInt(0xFF009688);
+
+  // Corresponde a AppColors.normalColor (0xFF4CAF50).
+  static final normal = PdfColor.fromInt(0xFF4CAF50);
+
+  // Corresponde a AppColors.warningColor (0xFFFFC107).
+  static final warning = PdfColor.fromInt(0xFFFFC107);
+
+  // Corresponde a AppColors.dangerColor (0xFFF44336).
+  static final danger = PdfColor.fromInt(0xFFF44336);
+}
+
 class ReportPdfService {
   const ReportPdfService({this.compress = true});
 
@@ -48,7 +68,7 @@ class ReportPdfService {
             style: pw.TextStyle(
               fontSize: 22,
               fontWeight: pw.FontWeight.bold,
-              color: PdfColors.teal700,
+              color: _PdfBrandColors.primary,
             ),
           ),
           pw.Text(
@@ -168,7 +188,7 @@ class ReportPdfService {
                     records[index].value.toDouble(),
                   ),
               ],
-              color: PdfColors.teal700,
+              color: _PdfBrandColors.primary,
               drawSurface: true,
               isCurved: false,
             ),
@@ -271,7 +291,7 @@ class ReportPdfService {
           fontWeight: pw.FontWeight.bold,
           color: PdfColors.white,
         ),
-        headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
+        headerDecoration: pw.BoxDecoration(color: _PdfBrandColors.primary),
         cellStyle: const pw.TextStyle(fontSize: 8),
         cellPadding: const pw.EdgeInsets.all(4),
       ),
@@ -284,15 +304,15 @@ class ReportPdfService {
       style: pw.TextStyle(
         fontSize: 14,
         fontWeight: pw.FontWeight.bold,
-        color: PdfColors.teal800,
+        color: _PdfBrandColors.primary,
       ),
     ),
   );
 
   PdfColor _levelColor(GlycemiaLevel level) => switch (level) {
-    GlycemiaLevel.hypoglycemia => PdfColors.red600,
-    GlycemiaLevel.normal => PdfColors.green600,
-    GlycemiaLevel.hyperglycemia => PdfColors.amber700,
+    GlycemiaLevel.hypoglycemia => _PdfBrandColors.danger,
+    GlycemiaLevel.normal => _PdfBrandColors.normal,
+    GlycemiaLevel.hyperglycemia => _PdfBrandColors.warning,
   };
 
   String _level(GlycemiaLevel level) => switch (level) {
