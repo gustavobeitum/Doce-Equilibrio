@@ -34,9 +34,6 @@ class HomeHeader extends StatelessWidget {
   }
 
   Future<void> _openSettings(BuildContext context) async {
-    // A Home não sabe o que aconteceu dentro de Configurações — o usuário
-    // pode ter registrado ou editado uma glicemia pelo Histórico, por
-    // exemplo. Por isso, sempre recarregamos os dados ao voltar de lá.
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
@@ -101,12 +98,6 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
 
-        // Os botões flutuam meio sobre o card verde, meio sobre o fundo
-        // branco. Em vez de usar Positioned(bottom: -36) dentro de um Stack
-        // (que deixa a parte "vazada" fora dos limites do Stack sem
-        // resposta a toque), usamos Transform.translate: o botão continua
-        // no fluxo normal do layout, então toda a área visível responde ao
-        // toque corretamente.
         Transform.translate(
           offset: const Offset(0, -16),
           child: Padding(
@@ -117,7 +108,7 @@ class HomeHeader extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => _openGlycemiaRecordModal(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor.darken(0.08),
+                      backgroundColor: AppColors.primaryColor.darken(0.04),
                       foregroundColor: Colors.white,
                       elevation: 4,
                       padding: const EdgeInsets.symmetric(vertical: 16),
