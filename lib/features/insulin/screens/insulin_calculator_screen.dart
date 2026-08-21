@@ -1,9 +1,10 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_card.dart';
 import 'package:doce_equilibrio/features/insulin/controllers/insulin_application_controller.dart';
 import 'package:doce_equilibrio/features/insulin/models/insulin_application_model.dart';
-import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
-import 'package:doce_equilibrio/features/insulin/widgets/meal_import_modal.dart';
+import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
+import 'package:doce_equilibrio/features/meals/widgets/meal_food_selection_modal.dart';
 import 'package:doce_equilibrio/features/settings/widgets/edit_insulin_parameters_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,12 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
   final _carbohydrates = TextEditingController();
   final _appliedDose = TextEditingController();
   final _observation = TextEditingController();
+
+  // Alimentos individuais escolhidos para compor os carboidratos da
+  // aplicação atual (ex.: bolo + suco), somados automaticamente no campo
+  // de carboidratos. Não são persistidos como uma refeição; servem só
+  // para o cálculo desta aplicação.
+  final List<MealItemModel> _selectedFoodItems = [];
 
   @override
   void initState() {
@@ -92,6 +99,7 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
     _carbohydrates.clear();
     _appliedDose.clear();
     _observation.clear();
+    _selectedFoodItems.clear();
   }
 
   void _cancel() {
@@ -105,6 +113,10 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
     _carbohydrates.text = _format(item.carbohydrates);
     _appliedDose.text = _format(item.appliedDose);
     _observation.text = item.observation ?? '';
+    // O detalhamento por alimento não é salvo junto da aplicação (só o
+    // total de carboidratos), então ao editar um registro antigo os chips
+    // começam vazios — o valor total continua correto no campo acima.
+    _selectedFoodItems.clear();
   }
 
   Future<void> _delete(InsulinApplicationModel item) async {
@@ -139,32 +151,38 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
     );
   }
 
-  Future<void> _selectMeal() async {
-    await _controller.loadMeals();
-    if (!mounted) return;
-    final meal = await showModalBottomSheet<MealModel>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      backgroundColor: AppColors.backgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => FractionallySizedBox(
-        heightFactor: 0.78,
-        child: ListenableBuilder(
-          listenable: _controller,
-          builder: (_, _) => MealImportModal(
-            meals: _controller.meals,
-            isLoading: _controller.isLoadingMeals,
-            errorMessage: _controller.mealsErrorMessage,
-            onRetry: _controller.loadMeals,
-          ),
-        ),
-      ),
+  /// Abre o seletor de alimentos da biblioteca (o mesmo já usado no
+  /// registro de refeições) e adiciona o item escolhido à lista local,
+  /// recalculando o total de carboidratos.
+  Future<void> _addFood() async {
+    final item = await MealFoodSelectionModal.exibir(context);
+    if (item == null || !mounted) return;
+    setState(() {
+      _selectedFoodItems.add(item);
+      _recalculateCarbsFromFoods();
+    });
+  }
+
+  void _removeFood(MealItemModel item) {
+    setState(() {
+      _selectedFoodItems.remove(item);
+      _recalculateCarbsFromFoods();
+    });
+  }
+
+  void _recalculateCarbsFromFoods() {
+    final total = _selectedFoodItems.fold<double>(
+      0,
+      (sum, item) => sum + item.carbohydrates,
     );
-    if (meal != null) {
-      _carbohydrates.text = _format(_controller.selectMeal(meal));
+    _carbohydrates.text = _format(total);
+    _controller.invalidateCalculation();
+  }
+
+  void _onCarbohydratesEditedManually() {
+    _controller.invalidateCalculation();
+    if (_selectedFoodItems.isNotEmpty) {
+      setState(() => _selectedFoodItems.clear());
     }
   }
 
@@ -278,9 +296,9 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
                           padding: const EdgeInsets.all(20),
                           children: [
                             if (_controller.user != null) _parametersCard(),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 16),
                             _formCard(),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 16),
                             _medicalWarning(),
                             const SizedBox(height: 20),
                             _history(),
@@ -297,37 +315,35 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
 
   Widget _parametersCard() {
     final user = _controller.user!;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Seus parâmetros atuais',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+    return AppCard(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Seus Parâmetros Atuais',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                TextButton.icon(
-                  onPressed: _editParameters,
-                  icon: const Icon(PhosphorIcons.pencilSimple, size: 16),
-                  label: const Text('Editar'),
+              ),
+              TextButton.icon(
+                onPressed: _editParameters,
+                icon: const Icon(PhosphorIcons.pencilSimple, size: 16),
+                label: const Text('Editar'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryColor,
                 ),
-              ],
-            ),
-            _row('Meta glicêmica', '${user.glycemiaTarget} mg/dL'),
-            _row(
-              'Fator de correção',
-              '1 UI / ${_format(user.correctionFactor)}',
-            ),
-            _row(
-              'Razão insulina/carbo.',
-              '1 UI / ${_format(user.sensitivityFactor)} g',
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          _row('Meta Glicêmica', '${user.glycemiaTarget} mg/dL'),
+          _row('Fator de Correção', '1 UI / ${_format(user.correctionFactor)}'),
+          _row(
+            'Razão Insulina/Carbo',
+            '1 UI / ${_format(user.sensitivityFactor)}g',
+          ),
+        ],
       ),
     );
   }
@@ -335,130 +351,203 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
   Widget _formCard() {
     final calculation = _controller.calculation;
     final editing = _controller.editingApplication != null;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              editing ? 'Editar aplicação' : 'Nova aplicação',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            editing ? 'Editar Aplicação' : 'Nova Aplicação',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _glycemia,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(3),
+            ],
+            decoration: _decoration(
+              'Glicemia Atual',
+              suffix: 'mg/dL',
+            ).copyWith(filled: true, fillColor: AppColors.backgroundColor),
+            onChanged: (_) => _controller.invalidateCalculation(),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Carboidratos da Refeição',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Digite manualmente ou selecione alimentos da sua biblioteca.',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _carbohydrates,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: _decoration(
+              'Carboidratos',
+              suffix: 'g',
+            ).copyWith(filled: true, fillColor: AppColors.backgroundColor),
+            onChanged: (_) => _onCarbohydratesEditedManually(),
+          ),
+          if (_selectedFoodItems.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _selectedFoodItems.map((item) {
+                return InputChip(
+                  key: Key('selected-food-${item.foodId}-${item.hashCode}'),
+                  label: Text(
+                    '${item.foodName} • ${_format(item.carbohydrates)}g',
+                  ),
+                  labelStyle: const TextStyle(
+                    color: AppColors.primaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                  backgroundColor: AppColors.primaryColor.withValues(
+                    alpha: 0.08,
+                  ),
+                  deleteIconColor: AppColors.primaryColor,
+                  side: BorderSide.none,
+                  onDeleted: () => _removeFood(item),
+                );
+              }).toList(),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              key: const Key('select-foods-button'),
+              onPressed: _addFood,
+              icon: const Icon(PhosphorIcons.plus, size: 18),
+              label: const Text('Selecionar Alimentos'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryColor,
+                backgroundColor: AppColors.primaryColor.withValues(alpha: 0.08),
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _calculate,
+              icon: const Icon(PhosphorIcons.calculator),
+              label: const Text('Calcular Dose'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: AppColors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          if (calculation != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Dose recomendada'),
+                  Text(
+                    '${_format(calculation.totalDose)} UI',
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  Text(
+                    'Glicemia: ${_glycemia.text} mg/dL • Carboidratos: ${_carbohydrates.text} g',
+                  ),
+                  _row(
+                    'Dose alimentar',
+                    '${_format(calculation.carbohydrateDose)} UI',
+                  ),
+                  _row(
+                    'Dose de correção',
+                    '${_format(calculation.correctionDose)} UI',
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: _glycemia,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(3),
-              ],
-              decoration: _decoration('Glicemia atual', suffix: 'mg/dL'),
-              onChanged: (_) => _controller.invalidateCalculation(),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _carbohydrates,
+              controller: _appliedDose,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: _decoration('Carboidratos', suffix: 'g'),
-              onChanged: (_) => _controller.clearMealSelection(),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: _selectMeal,
-              icon: const Icon(PhosphorIcons.bowlFood),
-              label: Text(
-                _controller.selectedMeal == null
-                    ? 'Importar de uma refeição'
-                    : 'Origem: ${_controller.selectedMeal!.type.label}',
-              ),
+              decoration: _decoration(
+                'Dose efetivamente aplicada',
+                suffix: 'UI',
+              ).copyWith(filled: true, fillColor: AppColors.backgroundColor),
             ),
             const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: _calculate,
-              icon: const Icon(PhosphorIcons.calculator),
-              label: const Text('Calcular dose recomendada'),
+            TextField(
+              controller: _observation,
+              maxLines: 3,
+              decoration: _decoration(
+                'Observação (opcional)',
+              ).copyWith(filled: true, fillColor: AppColors.backgroundColor),
             ),
-            if (calculation != null) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Dose recomendada'),
-                    Text(
-                      '${_format(calculation.totalDose)} UI',
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor,
-                      ),
-                    ),
-                    Text(
-                      'Glicemia: ${_glycemia.text} mg/dL • Carboidratos: ${_carbohydrates.text} g',
-                    ),
-                    _row(
-                      'Dose alimentar',
-                      '${_format(calculation.carbohydrateDose)} UI',
-                    ),
-                    _row(
-                      'Dose de correção',
-                      '${_format(calculation.correctionDose)} UI',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _appliedDose,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: _decoration(
-                  'Dose efetivamente aplicada',
-                  suffix: 'UI',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _observation,
-                maxLines: 3,
-                decoration: _decoration('Observação (opcional)'),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
                 onPressed: _controller.isSaving ? null : _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: AppColors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 child: _controller.isSaving
                     ? const SizedBox.square(
                         dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
                     : Text(
                         editing ? 'Salvar alterações' : 'Registrar aplicação',
                       ),
               ),
-            ],
-            if (_controller.errorMessage != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _controller.errorMessage!,
-                style: const TextStyle(color: AppColors.dangerColor),
-              ),
-            ],
-            if (editing)
-              TextButton(
-                onPressed: _cancel,
-                child: const Text('Cancelar edição'),
-              ),
+            ),
           ],
-        ),
+          if (_controller.errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _controller.errorMessage!,
+              style: const TextStyle(color: AppColors.dangerColor),
+            ),
+          ],
+          if (editing)
+            TextButton(
+              onPressed: _cancel,
+              child: const Text('Cancelar edição'),
+            ),
+        ],
       ),
     );
   }
@@ -472,36 +561,42 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
       ),
       const SizedBox(height: 8),
       if (_controller.applications.isEmpty)
-        const Card(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('Nenhuma aplicação registrada.'),
-          ),
+        const AppCard(
+          padding: EdgeInsets.all(16),
+          child: Text('Nenhuma aplicação registrada.'),
         )
       else
         ..._controller.applications.map(
-          (item) => Card(
-            child: ListTile(
-              title: Text(
-                '${_formatDateTime(item.dateTime)}\n'
-                '${_format(item.appliedDose)} UI aplicada',
-              ),
-              subtitle: Text(
-                'Recomendada: ${_format(item.recommendedDose)} UI • ${item.glycemia} mg/dL • ${_format(item.carbohydrates)} g',
-              ),
-              trailing: Wrap(
-                children: [
-                  IconButton(
-                    tooltip: 'Editar',
-                    onPressed: () => _edit(item),
-                    icon: const Icon(PhosphorIcons.pencilSimple),
-                  ),
-                  IconButton(
-                    tooltip: 'Excluir',
-                    onPressed: () => _delete(item),
-                    icon: const Icon(PhosphorIcons.trash),
-                  ),
-                ],
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AppCard(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  '${_formatDateTime(item.dateTime)}\n'
+                  '${_format(item.appliedDose)} UI aplicada',
+                ),
+                subtitle: Text(
+                  'Recomendada: ${_format(item.recommendedDose)} UI • ${item.glycemia} mg/dL • ${_format(item.carbohydrates)} g',
+                ),
+                trailing: Wrap(
+                  children: [
+                    IconButton(
+                      tooltip: 'Editar',
+                      onPressed: () => _edit(item),
+                      icon: const Icon(PhosphorIcons.pencilSimple),
+                    ),
+                    IconButton(
+                      tooltip: 'Excluir',
+                      onPressed: () => _delete(item),
+                      icon: const Icon(PhosphorIcons.trash),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -544,7 +639,9 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
     padding: const EdgeInsets.only(top: 6),
     child: Row(
       children: [
-        Expanded(child: Text(label)),
+        Expanded(
+          child: Text(label, style: TextStyle(color: Colors.grey.shade600)),
+        ),
         Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
       ],
     ),
