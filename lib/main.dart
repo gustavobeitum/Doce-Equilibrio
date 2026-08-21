@@ -1,6 +1,8 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/navigation/app_navigator.dart';
 import 'package:doce_equilibrio/core/services/notification_service.dart';
+import 'package:doce_equilibrio/core/database/database_connection.dart';
+import 'package:doce_equilibrio/core/database/dev_database_seeder.dart';
 import 'package:doce_equilibrio/features/auth/screens/authentication_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,6 +11,10 @@ import 'core/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupServiceLocator();
+  const enableDevSeed = bool.fromEnvironment('ENABLE_DEV_SEED');
+  if (DevDatabaseSeeder.shouldRun(enableDevSeed)) {
+    await DevDatabaseSeeder(getIt<DatabaseConnection>()).seed();
+  }
   await getIt<NotificationService>().init();
   runApp(const SweetBalanceApp());
 }
