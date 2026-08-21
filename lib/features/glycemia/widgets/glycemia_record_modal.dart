@@ -241,7 +241,13 @@ class _RegistroGlicemiaModalState extends State<GlycemiaRecordModal> {
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF4A4A4A),
                       ),
-                      decoration: _fieldDecoration(hintText: '120'),
+                      decoration: _fieldDecoration(hintText: '120').copyWith(
+                        hintStyle: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       validator: Validators.validateGlycemia,
                     ),
                     const SizedBox(height: 20),

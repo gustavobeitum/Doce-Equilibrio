@@ -108,7 +108,7 @@ class HomeHeader extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => _openGlycemiaRecordModal(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor.darken(0.04),
+                      backgroundColor: AppColors.primaryColor.darken(0.02),
                       foregroundColor: Colors.white,
                       elevation: 4,
                       padding: const EdgeInsets.symmetric(vertical: 16),
