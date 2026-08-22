@@ -89,7 +89,7 @@ class ParametersCard extends StatelessWidget {
           const SizedBox(height: 20),
 
           _buildInfoBlock(
-            title: 'Fator de Sensibilidade',
+            title: 'Razão Insulina/Carboidrato',
             subtitle: '1 UI de insulina anula Xg de carboidratos',
             value: '${_formatNumber(user.sensitivityFactor)}g',
           ),
