@@ -33,25 +33,6 @@ class HomeDashboardSection extends StatelessWidget {
   }
 }
 
-/// Classificação de referência da HbA1c (padrão SBD/ADA), usada apenas para
-/// exibir um selo informativo ao usuário — não substitui avaliação médica.
-class _Hba1cRange {
-  const _Hba1cRange(this.label, this.color);
-
-  final String label;
-  final Color color;
-
-  static _Hba1cRange forPercentage(double percentage) {
-    if (percentage < 5.7) {
-      return const _Hba1cRange('Normal', AppColors.normalColor);
-    }
-    if (percentage < 6.5) {
-      return const _Hba1cRange('Pré-diabetes', AppColors.warningColor);
-    }
-    return const _Hba1cRange('Diabetes', AppColors.dangerColor);
-  }
-}
-
 class _Hba1cCard extends StatelessWidget {
   const _Hba1cCard({required this.estimate});
 
@@ -59,11 +40,7 @@ class _Hba1cCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final range = estimate != null
-        ? _Hba1cRange.forPercentage(estimate!.percentage)
-        : null;
-
-    return _DashboardCard(
+      return _DashboardCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -90,26 +67,6 @@ class _Hba1cCard extends StatelessWidget {
                 color: AppColors.primaryColor,
                 fontSize: 38,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              key: const Key('hba1c-classification-badge'),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 5,
-              ),
-              decoration: BoxDecoration(
-                color: range!.color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                range.label,
-                style: TextStyle(
-                  color: range.color,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
               ),
             ),
             const SizedBox(height: 14),
