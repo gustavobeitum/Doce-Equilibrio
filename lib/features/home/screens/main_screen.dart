@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/features/activity/screens/activity_screen.dart';
 import 'package:doce_equilibrio/features/meals/screens/meals_screen.dart';
 import 'package:doce_equilibrio/features/insulin/screens/insulin_calculator_screen.dart';
+import 'package:doce_equilibrio/features/settings/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:doce_equilibrio/features/home/screens/home_screen.dart';
@@ -27,6 +28,7 @@ class _MainScreenState extends State<MainScreen> {
       InsulinCalculatorScreen(isActive: _currentIndex == 1),
       const MealsScreen(),
       const ActivityScreen(),
+      const SettingsScreen(),
     ];
 
     return Scaffold(
@@ -81,6 +83,11 @@ class _MainScreenState extends State<MainScreen> {
               icon: Icon(PhosphorIcons.heartbeat),
               activeIcon: Icon(PhosphorIcons.heartbeatFill),
               label: 'Atividade',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(PhosphorIcons.user),
+              activeIcon: Icon(PhosphorIcons.userFill),
+              label: 'Perfil',
             ),
           ],
         ),
