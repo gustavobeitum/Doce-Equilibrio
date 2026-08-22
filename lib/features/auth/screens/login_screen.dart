@@ -188,17 +188,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              'Esqueceu a senha?',
-                              style: TextStyle(color: AppColors.primaryColor),
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: _isLoading ? null : _performLogin,
