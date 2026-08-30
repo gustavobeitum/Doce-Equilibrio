@@ -196,7 +196,7 @@ class _EditarParametrosModalState extends State<EditInsulinParametersModal> {
                     const SizedBox(height: 24),
 
                     const Text(
-                      'Fator de Sensibilidade',
+                      'Razão Insulina/Carboidrato',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
