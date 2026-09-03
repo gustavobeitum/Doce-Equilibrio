@@ -8,13 +8,13 @@ class ActivityRepository implements ActivityRepositoryInterface {
   ActivityRepository(this._dbConnection);
 
   @override
-  Future<int> criar(ActivityModel atividade) async {
+  Future<int> create(ActivityModel atividade) async {
     final db = await _dbConnection.database;
     return await db.insert('Atividade', atividade.toMap());
   }
 
   @override
-  Future<int> atualizar(ActivityModel atividade) async {
+  Future<int> update(ActivityModel atividade) async {
     final db = await _dbConnection.database;
     return await db.update(
       'Atividade',
@@ -25,7 +25,7 @@ class ActivityRepository implements ActivityRepositoryInterface {
   }
 
   @override
-  Future<int> excluir(int id) async {
+  Future<int> delete(int id) async {
     final db = await _dbConnection.database;
     return await db.delete('Atividade', where: 'id = ?', whereArgs: [id]);
   }

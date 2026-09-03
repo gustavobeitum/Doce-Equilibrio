@@ -50,9 +50,9 @@ class ActivityController {
       );
 
       if (id == null) {
-        await repository.criar(atividade);
+        await repository.create(atividade);
       } else {
-        await repository.atualizar(atividade);
+        await repository.update(atividade);
       }
       return null;
     } catch (e) {
@@ -63,7 +63,7 @@ class ActivityController {
 
   Future<bool> excluir(int id) async {
     try {
-      final linhasAfetadas = await repository.excluir(id);
+      final linhasAfetadas = await repository.delete(id);
       return linhasAfetadas > 0;
     } catch (e) {
       debugPrint('ERRO AO EXCLUIR ATIVIDADE: $e');
