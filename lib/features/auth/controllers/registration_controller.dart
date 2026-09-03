@@ -24,7 +24,7 @@ class RegistrationController {
     required int height,
   }) async {
     try {
-      final emailExiste = await _userRepository.emailJaCadastrado(email.trim());
+      final emailExiste = await _userRepository.emailAlreadyRegistered(email.trim());
       if (emailExiste) {
         return 'Não foi possível concluir o cadastro. Verifique os dados informados ou tente acessar sua conta.';
       }

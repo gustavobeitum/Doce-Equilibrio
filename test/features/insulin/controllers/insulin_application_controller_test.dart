@@ -421,7 +421,7 @@ class _UserRepository implements UserRepositoryInterface {
   @override
   Future<int> create(UserModel user) => throw UnimplementedError();
   @override
-  Future<bool> emailJaCadastrado(String email) => throw UnimplementedError();
+  Future<bool> emailAlreadyRegistered(String email) => throw UnimplementedError();
   @override
   Future<UserModel?> findByEmail(String email) => throw UnimplementedError();
   @override

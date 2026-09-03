@@ -30,7 +30,7 @@ class UserRepository implements UserRepositoryInterface {
   }
 
   @override
-  Future<bool> emailJaCadastrado(String email) async {
+  Future<bool> emailAlreadyRegistered(String email) async {
     final db = await _dbConnection.database;
     final maps = await db.query(
       'Usuario',

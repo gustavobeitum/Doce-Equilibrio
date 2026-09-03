@@ -129,7 +129,7 @@ class _FakeUserRepository implements UserRepositoryInterface {
   Future<int> create(UserModel user) async => 1;
 
   @override
-  Future<bool> emailJaCadastrado(String email) async => false;
+  Future<bool> emailAlreadyRegistered(String email) async => false;
 
   @override
   Future<UserModel?> find(int id) async {
