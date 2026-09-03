@@ -8,13 +8,13 @@ class MedicationRepository implements MedicationRepositoryInterface {
   MedicationRepository(this._dbConnection);
 
   @override
-  Future<int> criar(MedicationModel medicamento) async {
+  Future<int> create(MedicationModel medicamento) async {
     final db = await _dbConnection.database;
     return await db.insert('Medicamento', medicamento.toMap());
   }
 
   @override
-  Future<int> atualizar(MedicationModel medicamento) async {
+  Future<int> update(MedicationModel medicamento) async {
     final db = await _dbConnection.database;
     return await db.update(
       'Medicamento',
@@ -25,7 +25,7 @@ class MedicationRepository implements MedicationRepositoryInterface {
   }
 
   @override
-  Future<int> excluir(int id) async {
+  Future<int> delete(int id) async {
     final db = await _dbConnection.database;
     return await db.delete('Medicamento', where: 'id = ?', whereArgs: [id]);
   }

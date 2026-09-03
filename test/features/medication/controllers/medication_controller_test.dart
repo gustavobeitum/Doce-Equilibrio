@@ -26,16 +26,16 @@ class _FakeMedicationRepository implements MedicationRepositoryInterface {
   MedicationModel? created;
 
   @override
-  Future<int> criar(MedicationModel medicamento) async {
+  Future<int> create(MedicationModel medicamento) async {
     created = medicamento;
     return 1;
   }
 
   @override
-  Future<int> atualizar(MedicationModel medicamento) async => 1;
+  Future<int> update(MedicationModel medicamento) async => 1;
 
   @override
-  Future<int> excluir(int id) async => 1;
+  Future<int> delete(int id) async => 1;
 
   @override
   Future<List<MedicationModel>> listByUser(int usuarioId) async => [];

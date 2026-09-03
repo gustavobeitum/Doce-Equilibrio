@@ -49,9 +49,9 @@ class MedicationController {
       );
 
       if (id == null) {
-        await repository.criar(medicamento);
+        await repository.create(medicamento);
       } else {
-        await repository.atualizar(medicamento);
+        await repository.update(medicamento);
       }
       return null;
     } catch (e) {
@@ -62,7 +62,7 @@ class MedicationController {
 
   Future<bool> excluir(int id) async {
     try {
-      final linhasAfetadas = await repository.excluir(id);
+      final linhasAfetadas = await repository.delete(id);
       return linhasAfetadas > 0;
     } catch (e) {
       debugPrint('ERRO AO EXCLUIR MEDICAMENTO: $e');
