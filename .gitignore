@@ -34,9 +34,6 @@ migrate_working_dir/
 **/build/
 /coverage/
 
-# Generated repository snapshots
-repomix-output.xml
-
 # Symbolication related
 app.*.symbols
 
