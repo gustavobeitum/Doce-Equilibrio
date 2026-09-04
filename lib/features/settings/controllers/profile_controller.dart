@@ -39,9 +39,7 @@ class ProfileController {
         salt: currentUser.salt,
         weight: weight,
         height: height,
-        lowDangerThreshold: currentUser.lowDangerThreshold,
         normalMinimumThreshold: currentUser.normalMinimumThreshold,
-        normalMaximumThreshold: currentUser.normalMaximumThreshold,
         highDangerThreshold: currentUser.highDangerThreshold,
         sensitivityFactor: currentUser.sensitivityFactor,
         correctionFactor: currentUser.correctionFactor,
@@ -53,9 +51,6 @@ class ProfileController {
   Future<void> logout() {
     return _sessionService.endSession();
   }
-
-  /// Atualiza os 4 limiares de classificação de glicemia do usuário.
-  /// Retorna `null` em caso de sucesso, ou uma mensagem de erro.
   Future<String?> updateGlycemiaTargets({
     required UserModel currentUser,
     required int lowAlertThreshold,
@@ -76,9 +71,7 @@ class ProfileController {
         salt: currentUser.salt,
         weight: currentUser.weight,
         height: currentUser.height,
-        lowDangerThreshold: currentUser.lowDangerThreshold,
         normalMinimumThreshold: lowAlertThreshold,
-        normalMaximumThreshold: currentUser.normalMaximumThreshold,
         highDangerThreshold: highDangerThreshold,
         sensitivityFactor: currentUser.sensitivityFactor,
         correctionFactor: currentUser.correctionFactor,
@@ -113,9 +106,7 @@ class ProfileController {
         salt: currentUser.salt,
         weight: currentUser.weight,
         height: currentUser.height,
-        lowDangerThreshold: currentUser.lowDangerThreshold,
         normalMinimumThreshold: currentUser.normalMinimumThreshold,
-        normalMaximumThreshold: currentUser.normalMaximumThreshold,
         highDangerThreshold: currentUser.highDangerThreshold,
         sensitivityFactor: sensitivityFactor,
         correctionFactor: correctionFactor,
