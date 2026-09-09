@@ -46,8 +46,8 @@ class DevSeedResult {
 class DevDatabaseSeeder {
   DevDatabaseSeeder(this._connection);
 
-  static const email = 'teste@doceequilibrio.local';
-  static const password = 'Teste@123';
+  static const email = 'beitumh@gmail.com';
+  static const password = 'Senha@123';
   static const _salt = 'ZGV2LXNlZWQtc2FsdC0yMDI2';
 
   final DatabaseConnection _connection;
@@ -117,10 +117,10 @@ class DevDatabaseSeeder {
 
   Future<int> _insertUser(DatabaseExecutor db, DateTime today) {
     return db.insert('Usuario', {
-      'nome': 'Usuário Teste',
+      'nome': 'Gustavo Beitum',
       'email': email,
-      'tipoDiabetes': 'Tipo 1',
-      'anoDiagnostico': today.year - 8,
+      'tipoDiabetes': 'Tipo 2',
+      'anoDiagnostico': today.year - 12,
       'senha': EncryptionUtils.generateSaltedHash(password, _salt),
       'salt': _salt,
       'peso': 72.0,
