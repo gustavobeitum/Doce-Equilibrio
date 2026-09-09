@@ -1,4 +1,4 @@
-import 'package:doce_equilibrio/features/settings/screens/edit_profile_screen.dart';
+import 'package:doce_equilibrio/features/settings/widgets/edit_profile_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
@@ -51,11 +51,9 @@ class _ConfigScreenState extends State<SettingsScreen> {
   Future<void> _abrirTelaEdicao() async {
     if (_user == null) return;
 
-    final atualizou = await Navigator.push(
+    final atualizou = await EditProfileModal.exibir(
       context,
-      MaterialPageRoute(
-        builder: (context) => EditProfileScreen(currentUser: _user!),
-      ),
+      currentUser: _user!,
     );
 
     if (!mounted) return;
