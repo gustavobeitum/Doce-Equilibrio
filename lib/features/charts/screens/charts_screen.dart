@@ -93,54 +93,41 @@ class _ChartsScreenState extends State<ChartsScreen> {
     ),
   );
 
-  Widget _header() => Container(
+Widget _header() => Container(
     width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+    padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
     color: AppColors.primaryColor,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    child: Row(
       children: [
-        InkWell(
-          onTap: () => Navigator.pop(context),
-          borderRadius: BorderRadius.circular(50),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              PhosphorIcons.caretLeft,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
         ),
-        const SizedBox(height: 16),
-        const Row(
-          children: [
-            _HeaderIcon(),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gráficos de Glicemia',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Acompanhe seus registros ao longo do tempo',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
+        const SizedBox(width: 8),
+        const Icon(
+          PhosphorIcons.chartLine,
+          color: Colors.white,
+          size: 28,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Gráficos de Glicemia',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+              Text(
+                'Acompanhe seus registros ao longo do tempo',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ],
+          ),
         ),
       ],
     ),
@@ -492,16 +479,3 @@ class _ChartsScreenState extends State<ChartsScreen> {
   String _two(int value) => value.toString().padLeft(2, '0');
 }
 
-class _HeaderIcon extends StatelessWidget {
-  const _HeaderIcon();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: Colors.white.withValues(alpha: 0.15),
-    ),
-    child: const Icon(PhosphorIcons.chartLine, color: Colors.white, size: 24),
-  );
-}
