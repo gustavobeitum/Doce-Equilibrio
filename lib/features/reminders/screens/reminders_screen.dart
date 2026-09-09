@@ -140,152 +140,122 @@ class _LembretesScreenState extends State<RemindersScreen> {
     }
   }
 
-  Widget _circularIcon({required IconData icone, required VoidCallback onTap}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(50),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.3),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icone, color: Colors.white, size: 22),
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.primaryColor,
+    body: SafeArea(
+      child: Column(
+        children: [
+          _header(),
+          Expanded(
+            child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              color: AppColors.primaryColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _circularIcon(
-                    icone: PhosphorIcons.caretLeft,
-                    onTap: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.15),
-                        ),
-                        child: const Icon(
-                          PhosphorIcons.bell,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+              color: AppColors.backgroundColor,
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
                       ),
-                      const SizedBox(width: 16),
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    )
+                  : RefreshIndicator(
+                      color: AppColors.primaryColor,
+                      onRefresh: _loadReminders,
+                      child: ListView(
+                        padding: const EdgeInsets.all(24),
                         children: [
-                          Text(
-                            'Alarmes e Lembretes',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          ElevatedButton.icon(
+                            onPressed: () => _openModal(),
+                            icon: const Icon(PhosphorIcons.plus, size: 18),
+                            label: const Text('Novo Lembrete'),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(0, 52),
+                              backgroundColor: AppColors.primaryColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
-                          Text(
-                            'Configure lembretes para medições',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
+                          const SizedBox(height: 24),
+                          if (_reminders.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 48),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    PhosphorIcons.bell,
+                                    size: 48,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Nenhum lembrete configurado.\nToque em "Novo Lembrete" para começar.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            ..._reminders.map(
+                              (reminder) => ReminderCard(
+                                reminder: reminder,
+                                onAlternarAtivo: (newValue) =>
+                                    _toggleActive(reminder, newValue),
+                                onEditar: () =>
+                                    _openModal(existingReminder: reminder),
+                                onExcluir: () => _confirmDeletion(reminder),
+                              ),
                             ),
-                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
             ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                color: AppColors.backgroundColor,
-                child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryColor,
-                        ),
-                      )
-                    : RefreshIndicator(
-                        color: AppColors.primaryColor,
-                        onRefresh: _loadReminders,
-                        child: ListView(
-                          padding: const EdgeInsets.all(24),
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: () => _openModal(),
-                              icon: const Icon(PhosphorIcons.plus, size: 18),
-                              label: const Text('Novo Lembrete'),
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(0, 52),
-                                backgroundColor: AppColors.primaryColor,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            if (_reminders.isEmpty)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 48,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      PhosphorIcons.bell,
-                                      size: 48,
-                                      color: Colors.grey.shade300,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Nenhum lembrete configurado.\nToque em "Novo Lembrete" para começar.',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            else
-                              ..._reminders.map(
-                                (reminder) => ReminderCard(
-                                  reminder: reminder,
-                                  onAlternarAtivo: (newValue) =>
-                                      _toggleActive(reminder, newValue),
-                                  onEditar: () =>
-                                      _openModal(existingReminder: reminder),
-                                  onExcluir: () => _confirmDeletion(reminder),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+
+  Widget _header() => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
+    color: AppColors.primaryColor,
+    child: Row(
+      children: [
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
+        ),
+        const SizedBox(width: 8),
+        const Icon(
+          PhosphorIcons.bell,
+          color: Colors.white,
+          size: 28,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Alarmes e Lembretes',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Configure lembretes para medições',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
