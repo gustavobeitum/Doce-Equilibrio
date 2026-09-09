@@ -121,51 +121,39 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Widget _header() => Container(
     width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
+    color: AppColors.primaryColor,
+    child: Row(
       children: [
-        InkWell(
-          onTap: () => Navigator.pop(context),
-          borderRadius: BorderRadius.circular(50),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              PhosphorIcons.caretLeft,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
         ),
-        const SizedBox(height: 16),
-        const Row(
-          children: [
-            Icon(PhosphorIcons.filePdf, color: Colors.white, size: 28),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Relatório',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Gere e compartilhe seu acompanhamento',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
+        const SizedBox(width: 8),
+        const Icon(
+          PhosphorIcons.filePdf,
+          color: Colors.white,
+          size: 28,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Relatório',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+              Text(
+                'Gere e compartilhe seu acompanhamento',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ],
+          ),
         ),
       ],
     ),
