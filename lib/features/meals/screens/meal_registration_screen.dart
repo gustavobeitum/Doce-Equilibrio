@@ -205,392 +205,381 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
     );
   }
 
-  Widget _circularIcon({required IconData icone, required VoidCallback onTap}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(50),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.3),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icone, color: Colors.white, size: 22),
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.primaryColor,
+    body: SafeArea(
+      child: Column(
+        children: [
+          _header(),
+          Expanded(
+            child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              color: AppColors.primaryColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              color: AppColors.backgroundColor,
+              child: ListView(
+                padding: const EdgeInsets.all(24),
                 children: [
-                  _circularIcon(
-                    icone: PhosphorIcons.caretLeft,
-                    onTap: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _isEditing ? 'Editar Refeição' : 'Registrar Refeição',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   const Text(
-                    'Adicione os alimentos e a quantidade de cada um',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                    'Tipo de Refeição',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                color: AppColors.backgroundColor,
-                child: ListView(
-                  padding: const EdgeInsets.all(24),
-                  children: [
-                    const Text(
-                      'Tipo de Refeição',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<MealType>(
-                      initialValue: _selectedType,
-                      decoration: _fieldDecoration(),
-                      items: MealType.values.map((type) {
-                        return DropdownMenuItem<MealType>(
-                          value: type,
-                          child: Text(type.label),
-                        );
-                      }).toList(),
-                      onChanged: (type) {
-                        if (type == null) return;
-                        setState(() => _selectedType = type);
-                      },
-                    ),
-                    const SizedBox(height: 20),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<MealType>(
+                    initialValue: _selectedType,
+                    decoration: _fieldDecoration(),
+                    items: MealType.values.map((type) {
+                      return DropdownMenuItem<MealType>(
+                        value: type,
+                        child: Text(type.label),
+                      );
+                    }).toList(),
+                    onChanged: (type) {
+                      if (type == null) return;
+                      setState(() => _selectedType = type);
+                    },
+                  ),
+                  const SizedBox(height: 20),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Data',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              InkWell(
-                                onTap: _selectDate,
-                                borderRadius: BorderRadius.circular(12),
-                                child: InputDecorator(
-                                  decoration: _fieldDecoration(
-                                    suffixIcon: const Icon(
-                                      PhosphorIcons.calendarBlank,
-                                      size: 20,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    '${_date.day.toString().padLeft(2, '0')}/'
-                                    '${_date.month.toString().padLeft(2, '0')}/'
-                                    '${_date.year}',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Hora',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              InkWell(
-                                onTap: _selectTime,
-                                borderRadius: BorderRadius.circular(12),
-                                child: InputDecorator(
-                                  decoration: _fieldDecoration(
-                                    suffixIcon: const Icon(
-                                      PhosphorIcons.clock,
-                                      size: 20,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    '${_time.hour.toString().padLeft(2, '0')}:'
-                                    '${_time.minute.toString().padLeft(2, '0')}',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    if (!_isEditing) ...[
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          key: const ValueKey('use-favorite-meal-button'),
-                          onPressed: _useFavorite,
-                          icon: const Icon(PhosphorIcons.star, size: 19),
-                          label: const Text('Usar refeição favorita'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 50),
-                            foregroundColor: AppColors.primaryColor,
-                            side: const BorderSide(
-                              color: AppColors.primaryColor,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Alimentos da Refeição',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        TextButton.icon(
-                          onPressed: _addFood,
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          icon: const Icon(PhosphorIcons.plus, size: 16),
-                          label: const Text('Adicionar'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    if (_items.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              PhosphorIcons.bowlFood,
-                              size: 36,
-                              color: Colors.grey.shade300,
+                            const Text(
+                              'Data',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              'Nenhum alimento adicionado ainda.',
-                              style: TextStyle(color: Colors.grey.shade600),
+                            InkWell(
+                              onTap: _selectDate,
+                              borderRadius: BorderRadius.circular(12),
+                              child: InputDecorator(
+                                decoration: _fieldDecoration(
+                                  suffixIcon: const Icon(
+                                    PhosphorIcons.calendarBlank,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${_date.day.toString().padLeft(2, '0')}/'
+                                  '${_date.month.toString().padLeft(2, '0')}/'
+                                  '${_date.year}',
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      )
-                    else
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
                         child: Column(
-                          children: List.generate(_items.length, (index) {
-                            final item = _items[index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Hora',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
                               ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.foodName,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${_formatNumber(item.quantityGrams)} ${item.servingUnit} • '
-                                          '${_formatNumber(item.carbohydrates)}g carboidratos',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey.shade600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            ),
+                            const SizedBox(height: 8),
+                            InkWell(
+                              onTap: _selectTime,
+                              borderRadius: BorderRadius.circular(12),
+                              child: InputDecorator(
+                                decoration: _fieldDecoration(
+                                  suffixIcon: const Icon(
+                                    PhosphorIcons.clock,
+                                    size: 20,
+                                    color: Colors.grey,
                                   ),
-                                  Row(
+                                ),
+                                child: Text(
+                                  '${_time.hour.toString().padLeft(2, '0')}:'
+                                  '${_time.minute.toString().padLeft(2, '0')}',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  if (!_isEditing) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        key: const ValueKey('use-favorite-meal-button'),
+                        onPressed: _useFavorite,
+                        icon: const Icon(PhosphorIcons.star, size: 19),
+                        label: const Text('Usar refeição favorita'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 50),
+                          foregroundColor: AppColors.primaryColor,
+                          side: const BorderSide(color: AppColors.primaryColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Alimentos da Refeição',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: _addFood,
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: const Icon(PhosphorIcons.plus, size: 16),
+                        label: const Text('Adicionar'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (_items.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            PhosphorIcons.bowlFood,
+                            size: 36,
+                            color: Colors.grey.shade300,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Nenhum alimento adicionado ainda.',
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: List.generate(_items.length, (index) {
+                          final item = _items[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      InkWell(
-                                        onTap: () => _editItemQuantity(index),
-                                        borderRadius: BorderRadius.circular(50),
-                                        child: const Padding(
-                                          padding: EdgeInsets.all(4.0),
-                                          child: Icon(
-                                            PhosphorIcons.pencilSimple,
-                                            color: Colors.grey,
-                                            size: 20,
-                                          ),
+                                      Text(
+                                        item.foodName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
-                                      InkWell(
-                                        onTap: () => _removeItem(index),
-                                        borderRadius: BorderRadius.circular(50),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: Icon(
-                                            PhosphorIcons.trash,
-                                            color: Colors.red.shade400,
-                                            size: 20,
-                                          ),
+                                      Text(
+                                        '${_formatNumber(item.quantityGrams)} ${item.servingUnit} • '
+                                        '${_formatNumber(item.carbohydrates)}g carboidratos',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ),
+                                ),
+                                Row(
+                                  children: [
+                                    InkWell(
+                                      onTap: () => _editItemQuantity(index),
+                                      borderRadius: BorderRadius.circular(50),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(4.0),
+                                        child: Icon(
+                                          PhosphorIcons.pencilSimple,
+                                          color: Colors.grey,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    InkWell(
+                                      onTap: () => _removeItem(index),
+                                      borderRadius: BorderRadius.circular(50),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Icon(
+                                          PhosphorIcons.trash,
+                                          color: Colors.red.shade400,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
                       ),
-                    const SizedBox(height: 20),
+                    ),
+                  const SizedBox(height: 20),
 
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor.withValues(alpha: 0.08),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total de Carboidratos',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          '${_formatNumber(_totalCarboidratos)}g',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  Material(
+                    color: Colors.transparent,
+                    child: SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: _favorita,
+                      onChanged: (value) => setState(() => _favorita = value),
+                      activeTrackColor: AppColors.primaryColor,
+                      title: const Text(
+                        'Marcar como favorita',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: const Text(
+                        'Fica em destaque pra reaproveitar depois',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  ElevatedButton(
+                    key: const ValueKey('save-meal-button'),
+                    onPressed: _isSaving ? null : _save,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(0, 52),
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Total de Carboidratos',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                    ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
                             ),
+                          )
+                        : Text(
+                            _isEditing
+                                ? 'Salvar Alterações'
+                                : 'Salvar Refeição',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text(
-                            '${_formatNumber(_totalCarboidratos)}g',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    Material(
-                      color: Colors.transparent,
-                      child: SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        value: _favorita,
-                        onChanged: (value) => setState(() => _favorita = value),
-                        activeTrackColor: AppColors.primaryColor,
-                        title: const Text(
-                          'Marcar como favorita',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: const Text(
-                          'Fica em destaque pra reaproveitar depois',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    ElevatedButton(
-                      key: const ValueKey('save-meal-button'),
-                      onPressed: _isSaving ? null : _save,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(0, 52),
-                        backgroundColor: AppColors.primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isSaving
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              _isEditing
-                                  ? 'Salvar Alterações'
-                                  : 'Salvar Refeição',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+
+  Widget _header() => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
+    color: AppColors.primaryColor,
+    child: Row(
+      children: [
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
+        ),
+        const SizedBox(width: 8),
+        const Icon(PhosphorIcons.forkKnife, color: Colors.white, size: 28),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _isEditing ? 'Editar Refeição' : 'Registrar Refeição',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Adicione os alimentos e a quantidade de cada um',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
