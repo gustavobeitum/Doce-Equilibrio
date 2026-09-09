@@ -23,8 +23,8 @@ class Validators {
 
   static String? validateGlycemia(String? value) {
     final parsed = int.tryParse(value?.trim() ?? '');
-    if (parsed == null || parsed < 20 || parsed > 600) {
-      return 'Informe um valor entre 20 e 600 mg/dL.';
+    if (parsed == null || parsed < 20 || parsed > 800) {
+      return 'Informe um valor entre 20 e 800 mg/dL.';
     }
     return null;
   }
