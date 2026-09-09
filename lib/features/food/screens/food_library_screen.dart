@@ -135,80 +135,13 @@ class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
     }
   }
 
-  Widget _circularIcon({required IconData icone, required VoidCallback onTap}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(50),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.3),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icone, color: Colors.white, size: 22),
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: AppColors.primaryColor,
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              color: AppColors.primaryColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _circularIcon(
-                    icone: PhosphorIcons.caretLeft,
-                    onTap: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.15),
-                        ),
-                        child: const Icon(
-                          PhosphorIcons.bowlFood,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Meus Alimentos',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Sua biblioteca de alimentos cadastrados',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            _header(),
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -308,5 +241,44 @@ class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
         ),
       ),
     );
+
+      Widget _header() => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
+    color: AppColors.primaryColor,
+    child: Row(
+      children: [
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
+        ),
+        const SizedBox(width: 8),
+        const Icon(
+          PhosphorIcons.bowlFood,
+          color: Colors.white,
+          size: 28,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Meus Alimentos',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Gerencie seus alimentos cadastrados',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
   }
-}
