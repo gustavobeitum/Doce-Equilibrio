@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/history/history_period.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/utils/formatters.dart';
+import 'package:doce_equilibrio/core/widgets/period_selector.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/charts/screens/charts_screen.dart';
 import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controller.dart';
@@ -202,42 +203,69 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _categorySelector() => Padding(
     padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-    child: SegmentedButton<HistoryCategory>(
-      segments: const [
-        ButtonSegment(value: HistoryCategory.glycemia, label: Text('Glicemia')),
-        ButtonSegment(value: HistoryCategory.insulin, label: Text('Insulina')),
-        ButtonSegment(value: HistoryCategory.meals, label: Text('Refeições')),
-      ],
-      selected: {_category},
-      onSelectionChanged: (selection) {
-        setState(() => _category = selection.single);
-        _load();
-      },
+    child: Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: HistoryCategory.values.map((category) {
+          final isSelected = category == _category;
+          final label = switch (category) {
+            HistoryCategory.glycemia => 'Glicemia',
+            HistoryCategory.insulin => 'Insulina',
+            HistoryCategory.meals => 'Refeições',
+          };
+          return Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                setState(() => _category = category);
+                _load();
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primaryColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primaryColor.withValues(
+                              alpha: 0.35,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     ),
   );
 
-  Widget _periodSelector() => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(
-      children: HistoryPeriod.values.map((period) {
-        final label = switch (period) {
-          HistoryPeriod.today => 'Hoje',
-          HistoryPeriod.last7Days => '7 dias',
-          HistoryPeriod.last30Days => '30 dias',
-          HistoryPeriod.last90Days => '90 dias',
-          HistoryPeriod.custom => 'Personalizado',
-        };
-        return Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ChoiceChip(
-            label: Text(label),
-            selected: _period == period,
-            onSelected: (_) => _changePeriod(period),
-          ),
-        );
-      }).toList(),
-    ),
+  Widget _periodSelector() => PeriodSelector(
+    periods: HistoryPeriod.values,
+    selected: _period,
+    onSelected: _changePeriod,
   );
 
   Widget _content() {

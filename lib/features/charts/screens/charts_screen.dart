@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/history/history_period.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/period_selector.dart';
 import 'package:doce_equilibrio/features/charts/controllers/charts_controller.dart';
 import 'package:doce_equilibrio/features/charts/domain/glycemia_chart_data.dart';
 import 'package:doce_equilibrio/features/glycemia/domain/services/glycemia_classifier.dart';
@@ -93,7 +94,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
     ),
   );
 
-Widget _header() => Container(
+  Widget _header() => Container(
     width: double.infinity,
     padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
     color: AppColors.primaryColor,
@@ -104,11 +105,7 @@ Widget _header() => Container(
           icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
         ),
         const SizedBox(width: 8),
-        const Icon(
-          PhosphorIcons.chartLine,
-          color: Colors.white,
-          size: 28,
-        ),
+        const Icon(PhosphorIcons.chartLine, color: Colors.white, size: 28),
         const SizedBox(width: 14),
         Expanded(
           child: Column(
@@ -133,30 +130,11 @@ Widget _header() => Container(
     ),
   );
 
-  Widget _periodSelector() => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    child: Row(
-      children: HistoryPeriod.values.map((period) {
-        final label = switch (period) {
-          HistoryPeriod.today => 'Hoje',
-          HistoryPeriod.last7Days => '7 dias',
-          HistoryPeriod.last30Days => '30 dias',
-          HistoryPeriod.last90Days => '90 dias',
-          HistoryPeriod.custom => 'Personalizado',
-        };
-        return Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ChoiceChip(
-            label: Text(label),
-            selected: _controller.period == period,
-            onSelected: _controller.isLoading
-                ? null
-                : (_) => _selectPeriod(period),
-          ),
-        );
-      }).toList(),
-    ),
+  Widget _periodSelector() => PeriodSelector(
+    periods: HistoryPeriod.values,
+    selected: _controller.period,
+    enabled: !_controller.isLoading,
+    onSelected: _selectPeriod,
   );
 
   Widget _content() {
@@ -478,4 +456,3 @@ Widget _header() => Container(
 
   String _two(int value) => value.toString().padLeft(2, '0');
 }
-

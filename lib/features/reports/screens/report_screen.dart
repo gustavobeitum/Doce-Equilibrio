@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/history/history_period.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/period_selector.dart';
 import 'package:doce_equilibrio/features/reports/controllers/report_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -130,11 +131,7 @@ class _ReportScreenState extends State<ReportScreen> {
           icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
         ),
         const SizedBox(width: 8),
-        const Icon(
-          PhosphorIcons.filePdf,
-          color: Colors.white,
-          size: 28,
-        ),
+        const Icon(PhosphorIcons.filePdf, color: Colors.white, size: 28),
         const SizedBox(width: 14),
         Expanded(
           child: Column(
@@ -159,16 +156,16 @@ class _ReportScreenState extends State<ReportScreen> {
     ),
   );
 
-  Widget _periodSelector() => SegmentedButton<HistoryPeriod>(
-    segments: const [
-      ButtonSegment(value: HistoryPeriod.last30Days, label: Text('30 dias')),
-      ButtonSegment(value: HistoryPeriod.last90Days, label: Text('90 dias')),
-      ButtonSegment(value: HistoryPeriod.custom, label: Text('Personalizado')),
+  Widget _periodSelector() => PeriodSelector(
+    periods: const [
+      HistoryPeriod.last30Days,
+      HistoryPeriod.last90Days,
+      HistoryPeriod.custom,
     ],
-    selected: {_controller.period},
-    onSelectionChanged: _controller.isGenerating
-        ? null
-        : (selection) => _controller.changePeriod(selection.single),
+    selected: _controller.period,
+    enabled: !_controller.isGenerating,
+    onSelected: _controller.changePeriod,
+    padding: EdgeInsets.zero,
   );
 
   Widget _success() => Card(
