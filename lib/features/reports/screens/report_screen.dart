@@ -169,6 +169,7 @@ class _ReportScreenState extends State<ReportScreen> {
   );
 
   Widget _success() => Card(
+    color: AppColors.white,
     child: Padding(
       padding: const EdgeInsets.all(18),
       child: Column(
@@ -220,6 +221,7 @@ class _ReportScreenState extends State<ReportScreen> {
   );
 
   Widget _message(IconData icon, String text, {bool danger = false}) => Card(
+    color: AppColors.white,
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
