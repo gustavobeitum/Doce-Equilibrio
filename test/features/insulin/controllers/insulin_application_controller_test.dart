@@ -350,9 +350,16 @@ class _ApplicationRepository implements InsulinApplicationRepositoryInterface {
   }
 
   @override
-  Future<List<InsulinApplicationModel>> listByUser(int userId) async {
+  Future<List<InsulinApplicationModel>> listByUser(
+    int userId, {
+    int? limit,
+    int? offset,
+  }) async {
     if (throwOnList) throw Exception('database');
-    return items.where((item) => item.userId == userId).toList();
+    var result = items.where((item) => item.userId == userId).toList();
+    if (offset != null) result = result.skip(offset).toList();
+    if (limit != null) result = result.take(limit).toList();
+    return result;
   }
 }
 
@@ -377,7 +384,11 @@ class _MealRepository implements MealRepositoryInterface {
   ];
 
   @override
-  Future<List<MealModel>> listByUser(int userId) async {
+  Future<List<MealModel>> listByUser(
+    int userId, {
+    int? limit,
+    int? offset,
+  }) async {
     lastUserId = userId;
     if (throwOnList) throw Exception('database');
     return items.where((meal) => meal.userId == userId).toList();

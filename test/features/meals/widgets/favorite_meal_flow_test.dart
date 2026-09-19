@@ -169,7 +169,11 @@ class _FakeMealRepository implements MealRepositoryInterface {
   Future<int> delete(int id) async => 1;
 
   @override
-  Future<List<MealModel>> listByUser(int userId) async => meals;
+  Future<List<MealModel>> listByUser(
+    int userId, {
+    int? limit,
+    int? offset,
+  }) async => meals;
 
   @override
   Future<List<MealModel>> listByPeriod(
