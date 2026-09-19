@@ -12,7 +12,13 @@ import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 class GlycemiaHistoryScreen extends StatefulWidget {
-  const GlycemiaHistoryScreen({super.key});
+  const GlycemiaHistoryScreen({
+    super.key,
+    this.focusRecordId,
+    this.autoOpenEdit = true,
+  });
+  final int? focusRecordId;
+  final bool autoOpenEdit;
 
   @override
   State<GlycemiaHistoryScreen> createState() => _HistoricoGlicemiaScreenState();
@@ -22,6 +28,7 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
   late final GlycemiaController _controller;
 
   bool _isLoading = true;
+  bool _focusHandled = false;
   List<GlycemiaRecordModel> _records = [];
   GlycemiaStatistics _estatisticas = GlycemiaStatistics.empty();
   UserModel? _user;
@@ -53,6 +60,32 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
       _records = records;
       _estatisticas = estatisticas;
       _isLoading = false;
+    });
+
+    _handleFocusRecord(records);
+  }
+
+  void _handleFocusRecord(List<GlycemiaRecordModel> records) {
+    if (_focusHandled || widget.focusRecordId == null) return;
+    _focusHandled = true;
+
+    GlycemiaRecordModel? match;
+    for (final record in records) {
+      if (record.id == widget.focusRecordId) {
+        match = record;
+        break;
+      }
+    }
+    if (match == null) return;
+
+    final focusedRecord = match;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.autoOpenEdit) {
+        _openRecordModal(existingRecord: focusedRecord);
+      } else {
+        _confirmDeletion(focusedRecord);
+      }
     });
   }
 

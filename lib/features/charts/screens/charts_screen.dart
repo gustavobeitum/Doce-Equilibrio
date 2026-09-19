@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/history/history_period.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_card.dart';
 import 'package:doce_equilibrio/core/widgets/period_selector.dart';
 import 'package:doce_equilibrio/features/charts/controllers/charts_controller.dart';
 import 'package:doce_equilibrio/features/charts/domain/glycemia_chart_data.dart';
@@ -246,26 +247,24 @@ class _ChartsScreenState extends State<ChartsScreen> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(PhosphorIcons.testTube, color: AppColors.primaryColor),
-                  SizedBox(width: 8),
-                  Text(
-                    'HbA1c estimada',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              content,
-            ],
-          ),
+      child: AppCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(PhosphorIcons.testTube, color: AppColors.primaryColor),
+                SizedBox(width: 8),
+                Text(
+                  'HbA1c estimada',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            content,
+          ],
         ),
       ),
     );
@@ -405,21 +404,19 @@ class _ChartsScreenState extends State<ChartsScreen> {
     ],
   );
 
-  Widget _card(String title, String subtitle, Widget child) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
-          const SizedBox(height: 20),
-          child,
-        ],
-      ),
+  Widget _card(String title, String subtitle, Widget child) => AppCard(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
+        const SizedBox(height: 20),
+        child,
+      ],
     ),
   );
 
