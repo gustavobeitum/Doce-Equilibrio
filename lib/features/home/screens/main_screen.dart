@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
       InsulinCalculatorScreen(isActive: _currentIndex == 1),
       const MealsScreen(),
       const ActivityScreen(),
-      const SettingsScreen(),
+      SettingsScreen(isActive: _currentIndex == 4),
     ];
 
     return Scaffold(
