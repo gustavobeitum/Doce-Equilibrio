@@ -11,10 +11,10 @@ class ActivityController {
 
   ActivityController(this.repository, this._sessionService);
 
-  Future<List<ActivityModel>> listar() async {
+  Future<List<ActivityModel>> listar({int? limit, int? offset}) async {
     final usuarioId = await _sessionService.getCurrentUserId();
     if (usuarioId == null) return [];
-    return repository.listByUser(usuarioId);
+    return repository.listByUser(usuarioId, limit: limit, offset: offset);
   }
 
   Future<String?> salvar({

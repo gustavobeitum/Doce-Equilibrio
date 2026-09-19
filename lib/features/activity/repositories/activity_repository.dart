@@ -31,13 +31,19 @@ class ActivityRepository implements ActivityRepositoryInterface {
   }
 
   @override
-  Future<List<ActivityModel>> listByUser(int usuarioId) async {
+  Future<List<ActivityModel>> listByUser(
+    int usuarioId, {
+    int? limit,
+    int? offset,
+  }) async {
     final db = await _dbConnection.database;
     final maps = await db.query(
       'Atividade',
       where: 'usuarioId = ?',
       whereArgs: [usuarioId],
       orderBy: 'dataHora DESC',
+      limit: limit,
+      offset: offset,
     );
     return maps.map((map) => ActivityModel.fromMap(map)).toList();
   }

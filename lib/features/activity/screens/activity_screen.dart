@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/activity/controllers/activity_controller.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_model.dart';
 import 'package:doce_equilibrio/features/activity/widgets/activity_card.dart';
@@ -15,9 +16,14 @@ class ActivityScreen extends StatefulWidget {
 }
 
 class _AtividadeScreenState extends State<ActivityScreen> {
+  static const int _pageSize = 20;
+
   late final ActivityController _controller;
 
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _offset = 0;
   String? _loadError;
   List<ActivityModel> _atividades = [];
 
@@ -35,21 +41,51 @@ class _AtividadeScreenState extends State<ActivityScreen> {
     });
 
     try {
-      final atividades = await _controller.listar();
+      final atividades = await _controller.listar(
+        limit: _pageSize,
+        offset: 0,
+      );
       if (!mounted) return;
-      setState(() => _atividades = atividades);
+      setState(() {
+        _atividades = atividades;
+        _offset = atividades.length;
+        _hasMore = atividades.length == _pageSize;
+      });
     } catch (error, stackTrace) {
       debugPrint('ERRO AO CARREGAR ATIVIDADES: $error');
       debugPrintStack(stackTrace: stackTrace);
       if (!mounted) return;
       setState(() {
         _atividades = [];
+        _hasMore = false;
         _loadError = 'Não foi possível carregar as atividades.';
       });
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final more = await _controller.listar(
+        limit: _pageSize,
+        offset: _offset,
+      );
+      if (!mounted) return;
+      setState(() {
+        _atividades = [..._atividades, ...more];
+        _offset += more.length;
+        _hasMore = more.length == _pageSize;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('ERRO AO CARREGAR MAIS ATIVIDADES: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
     }
   }
 
@@ -259,7 +295,7 @@ class _AtividadeScreenState extends State<ActivityScreen> {
                                   ],
                                 ),
                               )
-                            else
+                            else ...[
                               ..._atividades.map(
                                 (atividade) => ActivityCard(
                                   atividade: atividade,
@@ -268,6 +304,12 @@ class _AtividadeScreenState extends State<ActivityScreen> {
                                   onExcluir: () => _confirmDeletion(atividade),
                                 ),
                               ),
+                              if (_hasMore)
+                                LoadMoreButton(
+                                  isLoading: _isLoadingMore,
+                                  onPressed: _loadMore,
+                                ),
+                            ],
                           ],
                         ),
                       ),
