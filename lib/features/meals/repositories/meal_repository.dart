@@ -62,14 +62,16 @@ class MealRepository implements MealRepositoryInterface {
   @override
   Future<int> delete(int id) async {
     final db = await _dbConnection.database;
-    // RefeicaoItem tem ON DELETE CASCADE em refeicaoId, então os itens
-    // somem junto automaticamente.
     return await db.delete('Refeicao', where: 'id = ?', whereArgs: [id]);
   }
 
   @override
-  Future<List<MealModel>> listByUser(int userId) async {
-    return _list(userId);
+  Future<List<MealModel>> listByUser(
+    int userId, {
+    int? limit,
+    int? offset,
+  }) async {
+    return _list(userId, limit: limit, offset: offset);
   }
 
   @override
@@ -85,6 +87,8 @@ class MealRepository implements MealRepositoryInterface {
     int userId, {
     DateTime? start,
     DateTime? end,
+    int? limit,
+    int? offset,
   }) async {
     final db = await _dbConnection.database;
     final mapasRefeicoes = await db.query(
@@ -96,6 +100,8 @@ class MealRepository implements MealRepositoryInterface {
           ? [userId]
           : [userId, start.toIso8601String(), end!.toIso8601String()],
       orderBy: 'dataHora DESC',
+      limit: limit,
+      offset: offset,
     );
 
     final meals = <MealModel>[];

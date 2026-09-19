@@ -12,10 +12,10 @@ class MealController {
 
   MealController(this.repository, this._sessionService);
 
-  Future<List<MealModel>> list() async {
+  Future<List<MealModel>> list({int? limit, int? offset}) async {
     final userId = await _sessionService.getCurrentUserId();
     if (userId == null) return [];
-    return repository.listByUser(userId);
+    return repository.listByUser(userId, limit: limit, offset: offset);
   }
 
   Future<List<MealModel>> listByPeriod(DateTime start, DateTime end) async {

@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
@@ -17,9 +18,14 @@ class MealsScreen extends StatefulWidget {
 }
 
 class _MealsScreenState extends State<MealsScreen> {
+  static const int _pageSize = 20;
+
   late final MealController _controller;
 
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _offset = 0;
   List<MealModel> _meals = [];
 
   @override
@@ -31,12 +37,28 @@ class _MealsScreenState extends State<MealsScreen> {
 
   Future<void> _carregarRefeicoes() async {
     setState(() => _isLoading = true);
-    final meals = await _controller.list();
+    final meals = await _controller.list(limit: _pageSize, offset: 0);
 
     if (!mounted) return;
     setState(() {
       _meals = meals;
+      _offset = meals.length;
+      _hasMore = meals.length == _pageSize;
       _isLoading = false;
+    });
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    final more = await _controller.list(limit: _pageSize, offset: _offset);
+
+    if (!mounted) return;
+    setState(() {
+      _meals = [..._meals, ...more];
+      _offset += more.length;
+      _hasMore = more.length == _pageSize;
+      _isLoadingMore = false;
     });
   }
 
@@ -325,7 +347,7 @@ class _MealsScreenState extends State<MealsScreen> {
                                   ],
                                 ),
                               )
-                            else
+                            else ...[
                               ..._meals.map(
                                 (meal) => MealCard(
                                   meal: meal,
@@ -340,6 +362,12 @@ class _MealsScreenState extends State<MealsScreen> {
                                       : null,
                                 ),
                               ),
+                              if (_hasMore)
+                                LoadMoreButton(
+                                  isLoading: _isLoadingMore,
+                                  onPressed: _loadMore,
+                                ),
+                            ],
                           ],
                         ),
                       ),
