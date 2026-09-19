@@ -5,7 +5,12 @@ abstract interface class InsulinApplicationRepositoryInterface {
   Future<int> update(InsulinApplicationModel application);
   Future<int> delete(int id, int userId);
   Future<InsulinApplicationModel?> findById(int id, int userId);
-  Future<List<InsulinApplicationModel>> listByUser(int userId);
+
+  Future<List<InsulinApplicationModel>> listByUser(
+    int userId, {
+    int? limit,
+    int? offset,
+  });
   Future<List<InsulinApplicationModel>> listByPeriod(
     int userId,
     DateTime start,

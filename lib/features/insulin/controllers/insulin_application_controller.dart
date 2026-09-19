@@ -11,6 +11,8 @@ import 'package:doce_equilibrio/features/meals/repositories/meal_repository_inte
 import 'package:flutter/foundation.dart';
 
 class InsulinApplicationController extends ChangeNotifier {
+  static const int pageSize = 20;
+
   final InsulinApplicationRepositoryInterface repository;
   final MealRepositoryInterface _mealRepository;
   final UserRepositoryInterface _userRepository;
@@ -26,6 +28,9 @@ class InsulinApplicationController extends ChangeNotifier {
   }) : _now = now ?? DateTime.now;
 
   bool isLoading = false;
+  bool isLoadingMore = false;
+  bool hasMoreApplications = true;
+  int _applicationsOffset = 0;
   bool isLoadingMeals = false;
   String? mealsErrorMessage;
   bool isSaving = false;
@@ -65,7 +70,37 @@ class InsulinApplicationController extends ChangeNotifier {
   }
 
   Future<void> _loadApplications(int userId) async {
-    applications = await repository.listByUser(userId);
+    final page = await repository.listByUser(
+      userId,
+      limit: pageSize,
+      offset: 0,
+    );
+    applications = page;
+    _applicationsOffset = page.length;
+    hasMoreApplications = page.length == pageSize;
+  }
+
+  Future<void> loadMoreApplications() async {
+    if (isLoadingMore || !hasMoreApplications) return;
+    final userId = user?.id;
+    if (userId == null) return;
+    isLoadingMore = true;
+    notifyListeners();
+    try {
+      final page = await repository.listByUser(
+        userId,
+        limit: pageSize,
+        offset: _applicationsOffset,
+      );
+      applications = [...applications, ...page];
+      _applicationsOffset += page.length;
+      hasMoreApplications = page.length == pageSize;
+    } catch (_) {
+      // Mantém a lista atual; o usuário pode tocar em "Ver mais" de novo.
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
+    }
   }
 
   Future<List<InsulinApplicationModel>> listByPeriod(
@@ -187,7 +222,13 @@ class InsulinApplicationController extends ChangeNotifier {
       editingApplication = null;
       selectedMeal = null;
       calculation = null;
-      applications = await repository.listByUser(currentUser.id!);
+      applications = await repository.listByUser(
+        currentUser.id!,
+        limit: pageSize,
+        offset: 0,
+      );
+      _applicationsOffset = applications.length;
+      hasMoreApplications = applications.length == pageSize;
       return true;
     } catch (_) {
       errorMessage = 'Não foi possível salvar a aplicação. Tente novamente.';
@@ -227,7 +268,13 @@ class InsulinApplicationController extends ChangeNotifier {
     try {
       final deleted = await repository.delete(application.id!, userId) > 0;
       if (deleted) {
-        applications = await repository.listByUser(userId);
+        applications = await repository.listByUser(
+          userId,
+          limit: pageSize,
+          offset: 0,
+        );
+        _applicationsOffset = applications.length;
+        hasMoreApplications = applications.length == pageSize;
         successMessage = 'Aplicação excluída com sucesso.';
         if (editingApplication?.id == application.id) cancelEditing();
       }

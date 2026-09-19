@@ -1,8 +1,10 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_card.dart';
+import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/insulin/controllers/insulin_application_controller.dart';
 import 'package:doce_equilibrio/features/insulin/models/insulin_application_model.dart';
+import 'package:doce_equilibrio/features/insulin/widgets/insulin_card.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
 import 'package:doce_equilibrio/features/meals/widgets/meal_food_selection_modal.dart';
 import 'package:doce_equilibrio/features/settings/widgets/edit_insulin_parameters_modal.dart';
@@ -20,15 +22,12 @@ class InsulinCalculatorScreen extends StatefulWidget {
 
 class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
   late final InsulinApplicationController _controller;
+  final _scrollController = ScrollController();
   final _glycemia = TextEditingController();
   final _carbohydrates = TextEditingController();
   final _appliedDose = TextEditingController();
   final _observation = TextEditingController();
 
-  // Alimentos individuais escolhidos para compor os carboidratos da
-  // aplicação atual (ex.: bolo + suco), somados automaticamente no campo
-  // de carboidratos. Não são persistidos como uma refeição; servem só
-  // para o cálculo desta aplicação.
   final List<MealItemModel> _selectedFoodItems = [];
 
   @override
@@ -42,6 +41,7 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
   void dispose() {
     _controller.removeListener(_refresh);
     _controller.dispose();
+    _scrollController.dispose();
     for (final controller in [
       _glycemia,
       _carbohydrates,
@@ -113,10 +113,15 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
     _carbohydrates.text = _format(item.carbohydrates);
     _appliedDose.text = _format(item.appliedDose);
     _observation.text = item.observation ?? '';
-    // O detalhamento por alimento não é salvo junto da aplicação (só o
-    // total de carboidratos), então ao editar um registro antigo os chips
-    // começam vazios — o valor total continua correto no campo acima.
     _selectedFoodItems.clear();
+
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Future<void> _delete(InsulinApplicationModel item) async {
@@ -293,6 +298,7 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
                     : RefreshIndicator(
                         onRefresh: _controller.load,
                         child: ListView(
+                          controller: _scrollController,
                           padding: const EdgeInsets.all(20),
                           children: [
                             if (_controller.user != null) _parametersCard(),
@@ -565,52 +571,22 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
           padding: EdgeInsets.all(16),
           child: Text('Nenhuma aplicação registrada.'),
         )
-      else
+      else ...[
         ..._controller.applications.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AppCard(
-              padding: EdgeInsets.zero,
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                title: Text(
-                  '${_formatDateTime(item.dateTime)}\n'
-                  '${_format(item.appliedDose)} UI aplicada',
-                ),
-                subtitle: Text(
-                  'Recomendada: ${_format(item.recommendedDose)} UI • ${item.glycemia} mg/dL • ${_format(item.carbohydrates)} g',
-                ),
-                trailing: Wrap(
-                  children: [
-                    IconButton(
-                      tooltip: 'Editar',
-                      onPressed: () => _edit(item),
-                      icon: const Icon(PhosphorIcons.pencilSimple),
-                    ),
-                    IconButton(
-                      tooltip: 'Excluir',
-                      onPressed: () => _delete(item),
-                      icon: const Icon(PhosphorIcons.trash),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          (item) => InsulinCard(
+            application: item,
+            onEditar: () => _edit(item),
+            onExcluir: () => _delete(item),
           ),
         ),
+        if (_controller.hasMoreApplications)
+          LoadMoreButton(
+            isLoading: _controller.isLoadingMore,
+            onPressed: _controller.loadMoreApplications,
+          ),
+      ],
     ],
   );
-
-  String _formatDateTime(DateTime value) {
-    final day = value.day.toString().padLeft(2, '0');
-    final month = value.month.toString().padLeft(2, '0');
-    final hour = value.hour.toString().padLeft(2, '0');
-    final minute = value.minute.toString().padLeft(2, '0');
-    return '$day/$month/${value.year} • $hour:$minute';
-  }
 
   Widget _medicalWarning() => Container(
     padding: const EdgeInsets.all(16),

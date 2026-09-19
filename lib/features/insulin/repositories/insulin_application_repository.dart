@@ -52,13 +52,19 @@ class InsulinApplicationRepository
   }
 
   @override
-  Future<List<InsulinApplicationModel>> listByUser(int userId) async {
+  Future<List<InsulinApplicationModel>> listByUser(
+    int userId, {
+    int? limit,
+    int? offset,
+  }) async {
     final db = await _connection.database;
     final rows = await db.query(
       'AplicacaoInsulina',
       where: 'usuarioId = ?',
       whereArgs: [userId],
       orderBy: 'dataHora DESC',
+      limit: limit,
+      offset: offset,
     );
     return rows.map(InsulinApplicationModel.fromMap).toList();
   }
