@@ -21,7 +21,8 @@ import 'package:doce_equilibrio/features/settings/widgets/medications_card.dart'
 import 'package:doce_equilibrio/features/medication/screens/medications_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.isActive = true});
+  final bool isActive;
 
   @override
   State<SettingsScreen> createState() => _ConfigScreenState();
@@ -37,6 +38,15 @@ class _ConfigScreenState extends State<SettingsScreen> {
     super.initState();
     _controller = getIt<ProfileController>();
     _carregarDadosUsuario();
+  }
+
+  @override
+  void didUpdateWidget(covariant SettingsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      setState(() => _isLoading = true);
+      _carregarDadosUsuario();
+    }
   }
 
   Future<void> _carregarDadosUsuario() async {
