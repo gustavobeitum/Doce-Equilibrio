@@ -51,7 +51,7 @@ class RegisterGlycemiaCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Ver Histórico de Glicemia',
+                        'Gráficos e Histórico de Glicemia',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class RegisterGlycemiaCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Veja seus registros ou adicione uma nova medição',
+                        'Veja sua evolução por período e gerencie os registros',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade600,

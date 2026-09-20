@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
 import 'package:doce_equilibrio/features/glycemia/controllers/glycemia_controller.dart';
@@ -25,13 +26,27 @@ class GlycemiaHistoryScreen extends StatefulWidget {
 }
 
 class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
+  static const int _pageSize = 20;
+
   late final GlycemiaController _controller;
 
   bool _isLoading = true;
   bool _focusHandled = false;
+  int _visibleCount = _pageSize;
   List<GlycemiaRecordModel> _records = [];
   GlycemiaStatistics _estatisticas = GlycemiaStatistics.empty();
   UserModel? _user;
+
+  bool get _hasMore => _visibleCount < _records.length;
+
+  List<GlycemiaRecordModel> get _visibleRecords =>
+      _records.take(_visibleCount).toList();
+
+  void _loadMore() {
+    setState(() {
+      _visibleCount = (_visibleCount + _pageSize).clamp(0, _records.length);
+    });
+  }
 
   @override
   void initState() {
@@ -59,6 +74,7 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
       _user = user;
       _records = records;
       _estatisticas = estatisticas;
+      _visibleCount = _pageSize;
       _isLoading = false;
     });
 
@@ -294,8 +310,8 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
                                 ],
                               ),
                             )
-                          else
-                            ..._records.map(
+                          else ...[
+                            ..._visibleRecords.map(
                               (record) => GlycemiaRecordCard(
                                 record: record,
                                 user: _user!,
@@ -304,6 +320,9 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
                                 onExcluir: () => _confirmDeletion(record),
                               ),
                             ),
+                            if (_hasMore)
+                              LoadMoreButton(onPressed: _loadMore),
+                          ],
                         ],
                       ),
                     ),
