@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/utils/validators.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/home/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -33,11 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (widget.registrationCompleted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cadastro realizado com sucesso. Faça login.'),
-          ),
-        );
+        AppSnackbar.showSuccess(context, 'Cadastro realizado com sucesso. Faça login.');
       });
     }
   }
@@ -51,26 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(PhosphorIcons.warningCircleFill, color: AppColors.white),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: AppColors.dangerColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        margin: const EdgeInsets.all(24),
-      ),
-    );
+    AppSnackbar.showError(context, message);
   }
 
   Future<void> _performLogin() async {

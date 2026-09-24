@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/food/models/food_model.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
@@ -74,12 +75,9 @@ class _SelecionarAlimentoModalState extends State<MealFoodSelectionModal> {
 
   Future<void> _select(FoodModel food) async {
     if (food.carbohydratesPerServing == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Este alimento não possui carboidratos cadastrados. Atualize-o na biblioteca.',
-          ),
-        ),
+      AppSnackbar.showWarning(
+        context,
+        'Este alimento não possui carboidratos cadastrados. Atualize-o na biblioteca.',
       );
     }
 

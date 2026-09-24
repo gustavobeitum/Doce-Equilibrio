@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/utils/validators.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/auth/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
@@ -80,33 +81,7 @@ class _CadastroScreenState extends State<RegistrationScreen> {
           (Route<dynamic> route) => false,
         );
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(PhosphorIcons.xCircle, color: AppColors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    errorMessage ?? 'Erro desconhecido.',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: AppColors.dangerColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            margin: const EdgeInsets.all(24),
-            elevation: 6,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        AppSnackbar.showError(context, errorMessage ?? 'Erro desconhecido.');
       }
     }
   }

@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/activity/controllers/activity_controller.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_model.dart';
@@ -96,6 +97,13 @@ class _AtividadeScreenState extends State<ActivityScreen> {
     );
     if (salvou == true) {
       await _loadActivities();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        existingActivity == null
+            ? 'Atividade registrada com sucesso.'
+            : 'Atividade atualizada com sucesso.',
+      );
     }
   }
 
@@ -161,10 +169,10 @@ class _AtividadeScreenState extends State<ActivityScreen> {
 
       if (excluiu) {
         await _loadActivities();
+        if (!mounted) return;
+        AppSnackbar.showSuccess(context, 'Atividade excluída com sucesso.');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível excluir o registro.')),
-        );
+        AppSnackbar.showError(context, 'Não foi possível excluir o registro.');
       }
     }
   }

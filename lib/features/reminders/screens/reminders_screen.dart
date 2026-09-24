@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/reminders/controllers/reminder_controller.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_model.dart';
 import 'package:doce_equilibrio/features/reminders/widgets/reminder_card.dart';
@@ -45,6 +46,13 @@ class _LembretesScreenState extends State<RemindersScreen> {
     );
     if (saved == true) {
       await _loadReminders();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        existingReminder == null
+            ? 'Lembrete criado com sucesso.'
+            : 'Lembrete atualizado com sucesso.',
+      );
     }
   }
 
@@ -62,9 +70,7 @@ class _LembretesScreenState extends State<RemindersScreen> {
     if (!success) {
       await _loadReminders();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível atualizar o lembrete.')),
-      );
+      AppSnackbar.showError(context, 'Não foi possível atualizar o lembrete.');
     }
   }
 
@@ -132,10 +138,10 @@ class _LembretesScreenState extends State<RemindersScreen> {
 
       if (deleted) {
         await _loadReminders();
+        if (!mounted) return;
+        AppSnackbar.showSuccess(context, 'Lembrete excluído com sucesso.');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível excluir o lembrete.')),
-        );
+        AppSnackbar.showError(context, 'Não foi possível excluir o lembrete.');
       }
     }
   }

@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
@@ -154,10 +155,9 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
 
   Future<void> _save() async {
     if (_items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Adicione ao menos um alimento à refeição.'),
-        ),
+      AppSnackbar.showWarning(
+        context,
+        'Adicione ao menos um alimento à refeição.',
       );
       return;
     }
@@ -186,9 +186,7 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
     if (errorMessage == null) {
       Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      AppSnackbar.showError(context, errorMessage);
     }
   }
 

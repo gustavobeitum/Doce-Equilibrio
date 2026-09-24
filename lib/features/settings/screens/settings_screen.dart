@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/features/settings/widgets/edit_profile_modal.dar
 import 'package:flutter/material.dart';
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/auth/screens/login_screen.dart';
 import 'package:doce_equilibrio/features/settings/widgets/config_header.dart';
 import 'package:doce_equilibrio/features/settings/widgets/vital_data_card.dart';
@@ -70,6 +71,8 @@ class _ConfigScreenState extends State<SettingsScreen> {
     if (atualizou == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(context, 'Perfil atualizado com sucesso.');
     }
   }
 
@@ -85,6 +88,8 @@ class _ConfigScreenState extends State<SettingsScreen> {
     if (atualizou == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(context, 'Dados vitais atualizados com sucesso.');
     }
   }
 
@@ -121,6 +126,8 @@ class _ConfigScreenState extends State<SettingsScreen> {
     if (saved == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(context, 'Metas glicêmicas atualizadas com sucesso.');
     }
   }
 
@@ -136,6 +143,11 @@ class _ConfigScreenState extends State<SettingsScreen> {
     if (saved == true) {
       setState(() => _isLoading = true);
       await _carregarDadosUsuario();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        'Parâmetros de insulina atualizados com sucesso.',
+      );
     }
   }
 

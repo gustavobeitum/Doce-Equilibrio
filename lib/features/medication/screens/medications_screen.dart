@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/medication/controllers/medication_controller.dart';
 import 'package:doce_equilibrio/features/medication/models/medication_model.dart';
 import 'package:doce_equilibrio/features/medication/widgets/medication_card.dart';
@@ -45,6 +46,13 @@ class _MedicamentosScreenState extends State<MedicationsScreen> {
     );
     if (salvou == true) {
       await _loadMedications();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        existingMedication == null
+            ? 'Medicamento cadastrado com sucesso.'
+            : 'Medicamento atualizado com sucesso.',
+      );
     }
   }
 
@@ -110,10 +118,10 @@ class _MedicamentosScreenState extends State<MedicationsScreen> {
 
       if (excluiu) {
         await _loadMedications();
+        if (!mounted) return;
+        AppSnackbar.showSuccess(context, 'Medicamento excluído com sucesso.');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível excluir o registro.')),
-        );
+        AppSnackbar.showError(context, 'Não foi possível excluir o registro.');
       }
     }
   }

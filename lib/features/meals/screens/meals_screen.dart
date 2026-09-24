@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
@@ -81,6 +82,13 @@ class _MealsScreenState extends State<MealsScreen> {
     );
     if (saved == true) {
       await _carregarRefeicoes();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        existingMeal == null
+            ? 'Refeição registrada com sucesso.'
+            : 'Refeição atualizada com sucesso.',
+      );
     }
   }
 
@@ -109,9 +117,7 @@ class _MealsScreenState extends State<MealsScreen> {
     if (!updated) {
       await _carregarRefeicoes();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível atualizar a refeição.')),
-      );
+      AppSnackbar.showError(context, 'Não foi possível atualizar a refeição.');
     }
   }
 
@@ -177,10 +183,10 @@ class _MealsScreenState extends State<MealsScreen> {
 
       if (deleted) {
         await _carregarRefeicoes();
+        if (!mounted) return;
+        AppSnackbar.showSuccess(context, 'Refeição excluída com sucesso.');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível excluir a refeição.')),
-        );
+        AppSnackbar.showError(context, 'Não foi possível excluir a refeição.');
       }
     }
   }

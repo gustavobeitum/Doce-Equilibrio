@@ -1,5 +1,6 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/features/food/controllers/food_controller.dart';
 import 'package:doce_equilibrio/features/food/models/food_model.dart';
 import 'package:doce_equilibrio/features/food/widgets/food_card.dart';
@@ -62,6 +63,13 @@ class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
     final saved = await FoodModal.exibir(context, existingFood: existingFood);
     if (saved == true) {
       await _loadFoods();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        existingFood == null
+            ? 'Alimento cadastrado com sucesso.'
+            : 'Alimento atualizado com sucesso.',
+      );
     }
   }
 
@@ -127,10 +135,10 @@ class _BibliotecaFoodsScreenState extends State<FoodLibraryScreen> {
 
       if (deleted) {
         await _loadFoods();
+        if (!mounted) return;
+        AppSnackbar.showSuccess(context, 'Alimento excluído com sucesso.');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível excluir o alimento.')),
-        );
+        AppSnackbar.showError(context, 'Não foi possível excluir o alimento.');
       }
     }
   }

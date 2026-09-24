@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_card.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/insulin/controllers/insulin_application_controller.dart';
 import 'package:doce_equilibrio/features/insulin/models/insulin_application_model.dart';
@@ -89,9 +90,7 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
     if (!mounted || !saved) return;
     final message = _controller.successMessage ?? 'Aplicação salva.';
     _clearFields();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    AppSnackbar.showSuccess(context, message);
   }
 
   void _clearFields() {
@@ -145,15 +144,14 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
     if (confirmed != true) return;
     final deleted = await _controller.delete(item);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          deleted
-              ? 'Aplicação excluída com sucesso.'
-              : (_controller.errorMessage ?? 'Não foi possível excluir.'),
-        ),
-      ),
-    );
+    if (deleted) {
+      AppSnackbar.showSuccess(context, 'Aplicação excluída com sucesso.');
+    } else {
+      AppSnackbar.showError(
+        context,
+        _controller.errorMessage ?? 'Não foi possível excluir.',
+      );
+    }
   }
 
   /// Abre o seletor de alimentos da biblioteca (o mesmo já usado no

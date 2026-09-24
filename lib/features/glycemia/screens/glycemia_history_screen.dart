@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
@@ -112,6 +113,13 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
     );
     if (saved == true) {
       await _loadHistory();
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        existingRecord == null
+            ? 'Glicemia registrada com sucesso.'
+            : 'Glicemia atualizada com sucesso.',
+      );
     }
   }
 
@@ -182,10 +190,10 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
 
       if (deleted) {
         await _loadHistory();
+        if (!mounted) return;
+        AppSnackbar.showSuccess(context, 'Registro excluído com sucesso.');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível excluir o registro.')),
-        );
+        AppSnackbar.showError(context, 'Não foi possível excluir o registro.');
       }
     }
   }
