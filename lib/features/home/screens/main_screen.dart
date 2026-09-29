@@ -24,7 +24,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final telas = [
-      HomeScreen(onNavegarParaInsulina: _irParaAbaInsulina),
+      HomeScreen(
+        isActive: _currentIndex == 0,
+        onNavegarParaInsulina: _irParaAbaInsulina,
+      ),
       InsulinCalculatorScreen(isActive: _currentIndex == 1),
       const MealsScreen(),
       const ActivityScreen(),

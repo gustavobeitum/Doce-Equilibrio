@@ -14,8 +14,13 @@ import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onNavegarParaInsulina;
+  final bool isActive;
 
-  const HomeScreen({super.key, required this.onNavegarParaInsulina});
+  const HomeScreen({
+    super.key,
+    required this.onNavegarParaInsulina,
+    this.isActive = true,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -41,6 +46,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _glycemiaController = getIt<GlycemiaController>();
     _hba1cController = getIt<HbA1cController>();
     _loadInitialData();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) _loadInitialData();
   }
 
   Future<void> _loadInitialData() async {
