@@ -416,8 +416,9 @@ class _CardTitle extends StatelessWidget {
   }
 }
 
-/// Botão de "Exportar relatório" com visual de destaque (pílula preenchida
-/// com a cor primária), em vez do TextButton simples anterior.
+/// Card de "Exportar relatório", no mesmo padrão visual dos demais
+/// cards do dashboard (HbA1c, Tendência Semanal) — mantém a tela
+/// coesa em vez de destacar essa ação com um botão sólido isolado.
 class _ExportReportButton extends StatelessWidget {
   const _ExportReportButton({required this.onPressed});
 
@@ -425,27 +426,44 @@ class _ExportReportButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        key: const Key('export-report-button'),
-        onPressed: onPressed,
-        icon: const Icon(PhosphorIcons.filePdf, size: 20),
-        label: const Text('Exportar relatório'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryColor,
-          foregroundColor: AppColors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          elevation: 2,
-          shadowColor: AppColors.primaryColor.withValues(alpha: 0.4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+    return _DashboardCard(
+      child: Row(
+        children: [
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _CardTitle(
+                  icon: PhosphorIcons.filePdf,
+                  title: 'Relatório em PDF',
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Leve seu histórico para a consulta médica.',
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              ],
+            ),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
+          const SizedBox(width: 12),
+          Material(
+            color: AppColors.primaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              key: const Key('export-report-button'),
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(12),
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(
+                  PhosphorIcons.downloadSimple,
+                  size: 20,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
