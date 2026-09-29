@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 
-class RegisterGlycemiaCard extends StatelessWidget {
+class GlycemiaHistoryCard extends StatelessWidget {
   final VoidCallback onTap;
 
-  const RegisterGlycemiaCard({super.key, required this.onTap});
+  const GlycemiaHistoryCard({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,6 @@ class RegisterGlycemiaCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: Row(
               children: [
-                // 1. Ícone da Gota
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -39,7 +38,7 @@ class RegisterGlycemiaCard extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    PhosphorIcons.chartLine,
+                    PhosphorIcons.clockCounterClockwise,
                     color: AppColors.primaryColor,
                     size: 24,
                   ),
@@ -51,7 +50,7 @@ class RegisterGlycemiaCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Gráficos e Histórico de Glicemia',
+                        'Minhas Medições',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -60,7 +59,7 @@ class RegisterGlycemiaCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Veja sua evolução por período e gerencie os registros',
+                        'Registre novas leituras e acompanhe seu histórico completo de glicemia.',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade600,

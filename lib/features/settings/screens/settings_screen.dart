@@ -1,4 +1,6 @@
+import 'package:doce_equilibrio/features/glycemia/screens/glycemia_history_screen.dart';
 import 'package:doce_equilibrio/features/settings/widgets/edit_profile_modal.dart';
+import 'package:doce_equilibrio/features/settings/widgets/glycemia_history_card.dart';
 import 'package:flutter/material.dart';
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
@@ -107,10 +109,17 @@ class _ConfigScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _abrirHistoricoGlicemia() {
+  void _abrirGraficoEHistoricoGlicemia() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const HistoryScreen()),
+    );
+  }
+  
+  void _abrirGlicemia() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const GlycemiaHistoryScreen()),
     );
   }
 
@@ -277,8 +286,12 @@ class _ConfigScreenState extends State<SettingsScreen> {
                             SizedBox(height: 16),
                             MedicationsCard(onTap: _abrirMedicamentos),
                             SizedBox(height: 16),
+                            GlycemiaHistoryCard(
+                              onTap: _abrirGlicemia,
+                            ),
+                            SizedBox(height: 16),
                             RegisterGlycemiaCard(
-                              onTap: _abrirHistoricoGlicemia,
+                              onTap: _abrirGraficoEHistoricoGlicemia,
                             ),
                             SizedBox(height: 16),
                             LogoutCard(onTap: _confirmarLogout),
