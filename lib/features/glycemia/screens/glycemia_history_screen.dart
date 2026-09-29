@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/services/session_service.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/auth/models/user_model.dart';
 import 'package:doce_equilibrio/features/auth/repositories/user_repository_interface.dart';
@@ -298,25 +299,11 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
                           ),
                           const SizedBox(height: 24),
                           if (_records.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 48),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    PhosphorIcons.drop,
-                                    size: 48,
-                                    color: Colors.grey.shade300,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Nenhum registro encontrado.\nToque em "Registrar Glicemia" para começar.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const EmptyState(
+                              icon: PhosphorIcons.drop,
+                              title: 'Nenhum registro encontrado.',
+                              subtitle:
+                                  'Toque em "Registrar Glicemia" para começar.',
                             )
                           else ...[
                             ..._visibleRecords.map(
@@ -328,8 +315,7 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
                                 onExcluir: () => _confirmDeletion(record),
                               ),
                             ),
-                            if (_hasMore)
-                              LoadMoreButton(onPressed: _loadMore),
+                            if (_hasMore) LoadMoreButton(onPressed: _loadMore),
                           ],
                         ],
                       ),
@@ -341,7 +327,7 @@ class _HistoricoGlicemiaScreenState extends State<GlycemiaHistoryScreen> {
     ),
   );
 
-Widget _header() => Container(
+  Widget _header() => Container(
     width: double.infinity,
     padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
     color: AppColors.primaryColor,

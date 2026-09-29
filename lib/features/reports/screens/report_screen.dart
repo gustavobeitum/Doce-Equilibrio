@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/history/history_period.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/core/widgets/period_selector.dart';
 import 'package:doce_equilibrio/features/reports/controllers/report_controller.dart';
 import 'package:flutter/material.dart';
@@ -100,16 +101,12 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   const SizedBox(height: 18),
                   if (_controller.hasNoData)
-                    _message(
-                      PhosphorIcons.info,
-                      'Nenhum registro encontrado no período selecionado.',
+                    const EmptyState(
+                      icon: PhosphorIcons.chartLine,
+                      title: 'Nenhum registro de glicemia neste período.',
                     ),
                   if (_controller.errorMessage != null)
-                    _message(
-                      PhosphorIcons.warningCircle,
-                      _controller.errorMessage!,
-                      danger: true,
-                    ),
+                    _errorMessage(_controller.errorMessage!),
                   if (_controller.pdfBytes != null) _success(),
                 ],
               ),
@@ -220,16 +217,13 @@ class _ReportScreenState extends State<ReportScreen> {
     ),
   );
 
-  Widget _message(IconData icon, String text, {bool danger = false}) => Card(
+  Widget _errorMessage(String text) => Card(
     color: AppColors.white,
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: danger ? AppColors.dangerColor : AppColors.primaryColor,
-          ),
+          const Icon(PhosphorIcons.warningCircle, color: AppColors.dangerColor),
           const SizedBox(width: 12),
           Expanded(child: Text(text)),
         ],

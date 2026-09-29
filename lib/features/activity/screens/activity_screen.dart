@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/activity/controllers/activity_controller.dart';
 import 'package:doce_equilibrio/features/activity/models/activity_model.dart';
@@ -42,10 +43,7 @@ class _AtividadeScreenState extends State<ActivityScreen> {
     });
 
     try {
-      final atividades = await _controller.listar(
-        limit: _pageSize,
-        offset: 0,
-      );
+      final atividades = await _controller.listar(limit: _pageSize, offset: 0);
       if (!mounted) return;
       setState(() {
         _atividades = atividades;
@@ -72,10 +70,7 @@ class _AtividadeScreenState extends State<ActivityScreen> {
     if (_isLoadingMore || !_hasMore) return;
     setState(() => _isLoadingMore = true);
     try {
-      final more = await _controller.listar(
-        limit: _pageSize,
-        offset: _offset,
-      );
+      final more = await _controller.listar(limit: _pageSize, offset: _offset);
       if (!mounted) return;
       setState(() {
         _atividades = [..._atividades, ...more];
@@ -281,27 +276,11 @@ class _AtividadeScreenState extends State<ActivityScreen> {
                             ),
                             const SizedBox(height: 24),
                             if (_atividades.isEmpty)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 48,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      PhosphorIcons.heartbeat,
-                                      size: 48,
-                                      color: Colors.grey.shade300,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Nenhuma atividade registrada.\nToque em "Registrar Atividade" para começar.',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              const EmptyState(
+                                icon: PhosphorIcons.heartbeat,
+                                title: 'Nenhuma atividade registrada.',
+                                subtitle:
+                                    'Toque em "Registrar Atividade" para começar.',
                               )
                             else ...[
                               ..._atividades.map(

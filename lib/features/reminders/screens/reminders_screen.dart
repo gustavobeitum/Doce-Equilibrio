@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/features/reminders/controllers/reminder_controller.dart';
 import 'package:doce_equilibrio/features/reminders/models/reminder_model.dart';
 import 'package:doce_equilibrio/features/reminders/widgets/reminder_card.dart';
@@ -184,25 +185,11 @@ class _LembretesScreenState extends State<RemindersScreen> {
                           ),
                           const SizedBox(height: 24),
                           if (_reminders.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 48),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    PhosphorIcons.bell,
-                                    size: 48,
-                                    color: Colors.grey.shade300,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Nenhum lembrete configurado.\nToque em "Novo Lembrete" para começar.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const EmptyState(
+                              icon: PhosphorIcons.bell,
+                              title: 'Nenhum lembrete configurado.',
+                              subtitle:
+                                  'Toque em "Novo Lembrete" para começar.',
                             )
                           else
                             ..._reminders.map(
@@ -236,11 +223,7 @@ class _LembretesScreenState extends State<RemindersScreen> {
           icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
         ),
         const SizedBox(width: 8),
-        const Icon(
-          PhosphorIcons.bell,
-          color: Colors.white,
-          size: 28,
-        ),
+        const Icon(PhosphorIcons.bell, color: Colors.white, size: 28),
         const SizedBox(width: 14),
         Expanded(
           child: Column(

@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_item_model.dart';
 import 'package:doce_equilibrio/features/meals/models/meal_model.dart';
@@ -366,24 +367,14 @@ class _RegistrarRefeicaoScreenState extends State<MealRegistrationScreen> {
                   if (_items.isEmpty)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            PhosphorIcons.bowlFood,
-                            size: 36,
-                            color: Colors.grey.shade300,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Nenhum alimento adicionado ainda.',
-                            style: TextStyle(color: Colors.grey.shade600),
-                          ),
-                        ],
+                      child: const EmptyState(
+                        icon: PhosphorIcons.bowlFood,
+                        title: 'Nenhum alimento adicionado ainda.',
                       ),
                     )
                   else

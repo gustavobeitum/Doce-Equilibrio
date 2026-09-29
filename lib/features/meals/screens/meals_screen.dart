@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_food_controller.dart';
 import 'package:doce_equilibrio/features/meals/controllers/meal_controller.dart';
@@ -331,27 +332,11 @@ class _MealsScreenState extends State<MealsScreen> {
                             const SizedBox(height: 24),
 
                             if (_meals.isEmpty)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 48,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      PhosphorIcons.forkKnife,
-                                      size: 48,
-                                      color: Colors.grey.shade300,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Nenhuma refeição registrada.\nToque em "Registrar Refeição" para começar.',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              const EmptyState(
+                                icon: PhosphorIcons.forkKnife,
+                                title: 'Nenhuma refeição registrada.',
+                                subtitle:
+                                    'Toque em "Registrar Refeição" para começar.',
                               )
                             else ...[
                               ..._meals.map(

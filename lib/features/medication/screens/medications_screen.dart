@@ -1,6 +1,7 @@
 import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/features/medication/controllers/medication_controller.dart';
 import 'package:doce_equilibrio/features/medication/models/medication_model.dart';
 import 'package:doce_equilibrio/features/medication/widgets/medication_card.dart';
@@ -164,25 +165,11 @@ class _MedicamentosScreenState extends State<MedicationsScreen> {
                           ),
                           const SizedBox(height: 24),
                           if (_medicamentos.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 48),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    PhosphorIcons.pill,
-                                    size: 48,
-                                    color: Colors.grey.shade300,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Nenhum medicamento registrado.\nToque em "Registrar Medicamento" para começar.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const EmptyState(
+                              icon: PhosphorIcons.pill,
+                              title: 'Nenhum medicamento registrado.',
+                              subtitle:
+                                  'Toque em "Registrar Medicamento" para começar.',
                             )
                           else
                             ..._medicamentos.map(
@@ -203,7 +190,7 @@ class _MedicamentosScreenState extends State<MedicationsScreen> {
     ),
   );
 
-Widget _header() => Container(
+  Widget _header() => Container(
     width: double.infinity,
     padding: const EdgeInsets.fromLTRB(16, 8, 24, 20),
     color: AppColors.primaryColor,
@@ -214,11 +201,7 @@ Widget _header() => Container(
           icon: const Icon(PhosphorIcons.caretLeft, color: Colors.white),
         ),
         const SizedBox(width: 8),
-        const Icon(
-          PhosphorIcons.pill,
-          color: Colors.white,
-          size: 28,
-        ),
+        const Icon(PhosphorIcons.pill, color: Colors.white, size: 28),
         const SizedBox(width: 14),
         Expanded(
           child: Column(

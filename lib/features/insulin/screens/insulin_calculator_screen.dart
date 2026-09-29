@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_card.dart';
 import 'package:doce_equilibrio/core/widgets/app_snackbar.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/core/widgets/load_more_button.dart';
 import 'package:doce_equilibrio/features/insulin/controllers/insulin_application_controller.dart';
 import 'package:doce_equilibrio/features/insulin/models/insulin_application_model.dart';
@@ -565,9 +566,10 @@ class _InsulinCalculatorScreenState extends State<InsulinCalculatorScreen> {
       ),
       const SizedBox(height: 8),
       if (_controller.applications.isEmpty)
-        const AppCard(
-          padding: EdgeInsets.all(16),
-          child: Text('Nenhuma aplicação registrada.'),
+        const EmptyState(
+          icon: PhosphorIcons.drop,
+          title: 'Nenhuma aplicação registrada.',
+          subtitle: 'Toque em insira os valores e depois "Calcular Dose" para ter registros.',
         )
       else ...[
         ..._controller.applications.map(

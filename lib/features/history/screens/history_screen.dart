@@ -2,6 +2,7 @@ import 'package:doce_equilibrio/core/di/service_locator.dart';
 import 'package:doce_equilibrio/core/history/history_period.dart';
 import 'package:doce_equilibrio/core/theme/app_colors.dart';
 import 'package:doce_equilibrio/core/widgets/app_card.dart';
+import 'package:doce_equilibrio/core/widgets/empty_state.dart';
 import 'package:doce_equilibrio/core/widgets/period_selector.dart';
 import 'package:doce_equilibrio/features/charts/controllers/charts_controller.dart';
 import 'package:doce_equilibrio/features/charts/domain/glycemia_chart_data.dart';
@@ -191,9 +192,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
     if (_controller.errorMessage != null) {
       return [
-        _message(
+        EmptyState(
           icon: PhosphorIcons.warningCircle,
-          text: _controller.errorMessage!,
+          title: _controller.errorMessage!,
           action: ElevatedButton(
             onPressed: _controller.load,
             child: const Text('Tentar novamente'),
@@ -204,17 +205,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final data = _controller.data;
     if (data == null || data.isEmpty) {
       return [
-        _message(
+        const EmptyState(
           icon: PhosphorIcons.chartLine,
-          text: 'Nenhum registro de glicemia neste período.',
+          title: 'Nenhum registro de glicemia neste período.',
         ),
       ];
     }
     if (!data.hasEnoughData) {
       return [
-        _message(
+        const EmptyState(
           icon: PhosphorIcons.chartLine,
-          text:
+          title:
               'São necessários pelo menos dois registros de glicemia para visualizar os gráficos.',
         ),
       ];
@@ -474,25 +475,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         const SizedBox(height: 20),
         child,
       ],
-    ),
-  );
-
-  Widget _message({
-    required IconData icon,
-    required String text,
-    Widget? action,
-  }) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 48, color: Colors.grey.shade400),
-          const SizedBox(height: 12),
-          Text(text, textAlign: TextAlign.center),
-          if (action != null) ...[const SizedBox(height: 16), action],
-        ],
-      ),
     ),
   );
 
